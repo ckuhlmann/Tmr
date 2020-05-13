@@ -1,0 +1,1035 @@
+﻿ <!DOCTYPE HTML lang="en">
+ <html>
+ 
+ <head>
+ 	<title>Work/Break Tmr</title>
+ 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ 	<meta name="description" content="tmr" />
+ 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+ 	<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+ 	<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+ 	<link rel="icon" href="favicon.ico" type="image/x-icon" />
+ 	<style type="text/css">
+ 		body { font-family: 'Calibri', 'Noto Sans Display', 'Noto Sans', sans-serif; }
+ 		h1 {margin: .5ex .25ex .25ex 0ex;}
+ 		input.is-invalid { background-color: #FFEEEE; }
+ 		input.is-valid { background-color: #EEFFEE; }
+ 		label { min-width: 25ex; display:inline-block; text-align:right; }
+ 		label.nowidth, label.tlog { min-width:0; text-align:left; }
+ 		label.radio, label.checkbox { min-width: 17ex; display:inline-block; text-align:left; }
+ 		label.log { display:inline-block; text-align:left; }
+ 		fieldset { border: 1px solid #E0E0E0; display:inline-block; }
+ 		.btnBig {min-width: 25ex; min-height: 5em;}
+ 		
+ 		#frmTmr { border: 10px solid transparent; padding: 4px; }
+ 		
+ 		#frmTmr.notify {
+ 			border: 10px solid #FFCFB9;
+ 			animation:blinkBorder 1.2s infinite;
+ 		}
+ 		
+ 		#frmTmr.notifyoverdue {
+ 			border: 10px solid #FFCFB9;
+ 			animation:blinkBorderLight 2.4s 15;
+ 		}
+ 		
+ 		@keyframes blinkBorder{
+			  0%{	border-color: #FFCFB9;    }
+			 25%{	border-color: #FFA346; }
+			 49%{	border-color: #FFCFB9;    }
+			 60%{	border-color: transparent; }
+			 99%{	border-color:transparent;  }
+			100%{	border-color: #FFCFB9;    }
+		}
+		
+		@keyframes blinkBorderLight{
+			  0%{	border-color: #FFCFB9;    }
+			 49%{	border-color: #FFA346; }
+			 99%{	border-color: #FFCFB9;    }
+			100%{	border-color: #FFCFB9;    }
+		}
+ 		
+ 		#frmTmr.init { 
+ 			background-color: #F0F0F0; 
+ 		}
+ 		#frmTmr.paused { 
+ 			background-color: #E0E0F5; 
+ 		}
+ 		#frmTmr.working {
+ 			background-color: #F0F5F0;	
+ 		}
+ 		#frmTmr.breakrequired {
+ 			background-color: #FED1DD;
+ 		}
+ 		#frmTmr.onbreak {
+ 			background-color: #BADEB8;
+ 		}
+ 		#frmTmr.breakover {
+ 			background-color: #FFFFD2;
+ 		}
+ 		
+ 		
+ 		
+ 	</style>
+ 	<!--script src="jquery-3.5.1.slim.js" type="text/javascript"></script-->
+ 	<script type="text/javascript">
+ 		var tmrInt = null;
+ 		var tmrEvt = null;
+ 		
+ 		var startTime = null; // only valid when running, time when work/break started
+ 		var evtTime = null; // only valid when running, time when work/break ends/ended
+ 		var remDuration = 0; // only valid when paused: remaining duration
+ 		var elaDuration = 0; // only valid when paused: elapsed duration
+ 		var workSum = 0;
+ 		var breakSum = 0;
+ 		var workSessionsStartedNum = 0;
+ 		var workSessionsFinishedNum = 0;
+ 		var breakSessionsStartedNum = 0;
+ 		var breakSessionsFinishedNum = 0;
+ 		
+ 		var wrkDur = 0;
+ 		var brkDur = 0;
+ 		
+ 		var isNotifying = 0;
+ 		var Notif = null;
+ 		var notify = null;
+ 		
+ 		const tmrstate = {
+		    INIT: 'init',
+		    WORKING: 'working',
+		    BREAKREQUIRED: 'breakrequired',
+		    ONBREAK: 'onbreak',
+		    BREAKOVER: 'breakover'
+		}
+		
+		var isRunning = false;
+		
+		let state = tmrstate.INIT;
+
+ 		
+ 		function alertl(txt) {
+			dto = new Date();
+			dt = fmtDateTime(dto)+'.';//dto.getHours()+":"+dto.getMinutes()+":"+dto.getSeconds()+" "
+			//no = "$"+lognum++ + " "
+			tlog = document.getElementById("tlog");
+			tlog.value = dt + txt +"\r\n" + tlog.value;
+		}
+ 		
+ 		function clearSessionCounts() {
+ 			workSessionsStartedNum = 0;
+ 			workSessionsFinishedNum = 0;
+ 			breakSessionsStartedNum = 0;
+ 			breakSessionsFinishedNum = 0;
+ 		}
+ 		
+ 		function onTmrInt() {
+ 			tickTmr();
+ 		}
+ 		
+ 		function onTmrEvt() {
+ 			tickTmr();
+ 		}
+ 		
+ 		
+ 		function state2str(st) {
+ 			switch (st) {
+ 				case tmrstate.INIT:
+ 						return "Initialized."
+ 					break;
+ 				case tmrstate.WORKING:
+						return "You should be working."
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+ 						return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
+	 				break;
+ 				case tmrstate.ONBREAK:
+ 						return "You should be taking a break."
+	 				break;
+ 				case tmrstate.BREAKOVER:
+ 						return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
+	 				break;
+ 			}
+ 			return "";
+ 		}
+ 		
+ 		function state2strlong(st) {
+ 			str = "Hi there. "
+ 			switch (st) {
+ 				case tmrstate.INIT:
+ 						str += "Tmr initialized."
+ 					break;
+ 				case tmrstate.WORKING:
+						str +=  "You should be working."
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+ 						str +=  "You should now take a break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
+	 				break;
+ 				case tmrstate.ONBREAK:
+ 						str +=  "You should be enjoying your break right now."
+	 				break;
+ 				case tmrstate.BREAKOVER:
+ 						str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+	 				break;
+ 			}
+ 			return str;
+ 		}
+ 		
+ 		function startTmr() { // also: resume
+ 			
+ 			if (!validateInput()) {
+ 				return;
+ 			}
+ 			
+ 			if (isRunning) {
+ 				return;
+ 			}
+ 			
+ 			
+ 			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+ 			bdstr = document.getElementById('breakDuration').value;
+ 			bd = txt2duration(bdstr)
+ 			
+ 			ndstr = document.getElementById('notifyDuration').value;
+ 			nd = txt2duration(ndstr)
+ 			
+ 			remdstr = document.getElementById('remainDuration').value;
+ 			remd = txt2duration(remdstr)
+ 			
+ 			eladstr = document.getElementById('elapsedDuration').value;
+ 			elad = txt2duration(eladstr)
+ 			
+ 			isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
+
+			tme = Date.now(); 	
+ 			
+ 			switch (state) {
+ 				case tmrstate.INIT:
+ 						
+ 						// set event time
+ 						if (isWorking) {
+ 							dur = wd;
+ 							state = tmrstate.WORKING
+ 							workSessionsStartedNum += 1;
+ 						} else {
+ 							dur = bd;
+ 							state = tmrstate.ONBREAK
+ 							breakSessionsStartedNum += 1;
+ 						}
+ 						
+ 						evtTime = tme+dur
+ 						startTime = tme
+ 						
+ 						var tmrInt = window.window.setInterval(onTmrInt, 500);
+ 						var tmrEvt = window.setTimeout(onTmrEvt, dur)
+ 						
+ 						isRunning = true;
+ 						
+ 						alertl('> Tmr initially started.')
+ 						
+ 					break;
+ 					
+ 				case tmrstate.WORKING:
+ 				case tmrstate.BREAKREQUIRED:
+ 				case tmrstate.ONBREAK:
+ 				case tmrstate.BREAKOVER:
+	 					dur = remDuration
+	 					
+	 					evtTime = tme+dur
+	 					startTime = tme-elaDuration // synthetic, does not include pauses
+	 					
+	 					var tmrInt = window.window.setInterval(onTmrInt, 500);
+	 					var tmrEvt = window.setTimeout(onTmrEvt, dur)
+	 					
+	 					isRunning = true;
+	 					
+	 					alertl('> Tmr resumed.')
+ 					
+ 					break;
+ 			}
+ 			
+ 		}
+ 		
+ 		function pauseTmr() {
+ 			
+ 			if (!isRunning) {
+ 				return;
+ 			}
+ 			
+ 			if ((typeof Notif != 'undefined') && Notif !== null) {
+ 				Notif.close();
+ 			}
+ 			isNotifying = false;
+ 			
+ 			tme = Date.now();
+ 			
+ 			switch (state) {
+ 				case tmrstate.INIT: // this should never happen
+ 						
+ 						isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
+ 						
+ 						// set event time
+ 						if (isWorking) {
+ 							dur = wd;
+ 							state = tmrstate.WORKING
+ 						} else {
+ 							dur = bd;
+ 							state = tmrstate.ONBREAK
+ 						}
+ 						
+ 						evtTime = tme+dur
+ 						remDuration = dur;
+ 						elaDuration = 0;
+ 						
+ 						if ((typeof tmrInt !== 'undefined') && (tmrInt !== null)) { 
+ 							window.clearInterval(tmrInt);
+ 							tmrInt = null;
+ 						}
+ 						
+ 						if ((typeof tmrEvt !== 'undefined') && (tmrEvt !== null)) { 
+ 							window.clearInterval(tmrEvt);
+ 							tmrEvt = null;
+ 						}
+ 						
+ 						isRunning = false;
+ 						
+ 						
+ 					break;
+ 					
+ 				case tmrstate.WORKING:
+ 				case tmrstate.BREAKREQUIRED:
+ 				case tmrstate.ONBREAK:
+ 				case tmrstate.BREAKOVER:
+	 					remDuration = evtTime - tme // negative: elapsed since event
+	 					elaDuration = tme - startTime
+	 					
+	 					//evtTime = tme+dur
+	 					
+	 					if ((typeof tmrInt !== 'undefined') && (tmrInt !== null)) { 
+							window.clearInterval(tmrInt);
+							tmrInt = null;
+						}
+						
+						if ((typeof tmrEvt !== 'undefined') && (tmrEvt !== null)) { 
+							window.clearInterval(tmrEvt);
+							tmrEvt = null;
+						}
+						
+						isRunning = false;
+	 					
+	 				break;
+ 			}
+ 			
+ 			document.getElementById('frmTmr').className = 'paused'
+ 			
+ 			alertl('> Tmr paused.')
+ 		}
+ 		
+ 		function determineWorkDuration() {
+ 			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+			dur = wd;
+			
+			return dur;
+ 		}
+ 		
+ 		
+ 		function determineBreakDuration() {
+ 			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+ 			bdstr = document.getElementById('breakDuration').value;
+ 			bd = txt2duration(bdstr)
+ 			
+ 			lbdstr = document.getElementById('longBreakDuration').value;
+ 			lbd = txt2duration(lbdstr)
+ 			
+ 			lbastr = document.getElementById('longBreakAfter').value;
+ 			lba = parseInt(lbastr)
+ 			
+ 			enableLongbreaks = document.getElementById('cbEnableLongBreaks').checked;
+ 			longbreaksCountFinishedWork = document.getElementById('cbLongbreaksCountOnlyCompletedWork').checked;
+ 			
+ 			dur = -1;
+ 			
+ 			if (longbreaksCountFinishedWork != true) {
+				workSessionsNum = workSessionsStartedNum;
+			} else {
+				workSessionsNum = workSessionsFinishedNum;
+			}
+			
+			// determine if long break
+			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) { 
+				// long break required
+				dur = lbd;
+				
+			} else {
+				// standard break
+				dur = bd;
+			}
+			
+			return dur;
+ 		}
+ 		
+ 		function StartBreakFromNotification(event) {
+ 			//event.preventDefault();	// context switch so the break is encouraged
+ 			
+ 			alertl('Notification action='+event.action)
+ 			if ((event.action === 'apply') || (event.action === 'undefined')) {
+ 				StartBreak()
+ 			} else if (event.action === 'pause') {
+ 				pauseTmr()
+ 			} else {
+ 				StartBreak()
+ 			}
+ 		}
+ 		
+ 		function StartBreak() {
+ 			if (!isRunning) {
+ 				startTmr()
+ 			}
+ 			if ((typeof Notif != 'undefined') && Notif !== null) {
+ 				Notif.close();
+ 			}
+ 			isNotifying = false;
+ 			
+ 			switch (state) {
+ 				case tmrstate.INIT:
+ 						return
+ 					break;
+ 				case tmrstate.WORKING:
+						//ok 
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+ 						//ok
+	 				break;
+ 				case tmrstate.ONBREAK:
+ 						return;
+	 				break;
+ 				case tmrstate.BREAKOVER:
+ 						return;
+	 				break;
+ 			}
+ 			
+ 			tme = Date.now();
+ 			remDuration = evtTime - tme // negative: elapsed
+ 			
+ 			elaDuration = tme - startTime;
+ 			workSum+=elaDuration;
+ 			eladstr = duration2txt(elaDuration);
+ 			alertl('Starting break after working for '+eladstr+'.')
+ 			
+ 			elaDuration = 0;
+ 			startTime = tme
+
+ 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			
+ 			//wdstr = document.getElementById('workDuration').value;
+ 			//wd = txt2duration(wdstr)
+ 			
+ 			//bdstr = document.getElementById('breakDuration').value;
+ 			//bd = txt2duration(bdstr)
+ 			
+ 			//lbdstr = document.getElementById('longBreakDuration').value;
+ 			//lbd = txt2duration(lbdstr)
+ 			
+ 			//lbastr = document.getElementById('longBreakAfter').value;
+ 			//lba = parseInt(lbastr)
+ 			
+ 			//enableLongbreaks = document.getElementById('cbEnableLongBreaks').checked;
+ 			//longbreaksCountFinishedWork = document.getElementById('cbLongbreaksCountOnlyCompletedWork').checked;
+ 			
+ 			ndstr = document.getElementById('notifyDuration').value;
+ 			nd = txt2duration(ndstr)
+ 			
+ 			remdstr = document.getElementById('remainDuration').value;
+ 			remd = txt2duration(remdstr)
+ 			
+ 			isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
+ 			
+ 			
+ 			
+ 			state = tmrstate.ONBREAK
+ 							
+			isWorking = false;
+			document.getElementById('rbWrkBrk_Brk').checked = true
+			document.getElementById('rbWrkBrk_Wrk').checked = false
+			
+			dur = determineBreakDuration()
+		
+			evtTime = tme+dur
+		
+			var tmrEvt = window.setTimeout(onTmrEvt, dur)
+			
+			breakSessionsStartedNum += 1;
+			
+			alertl('> Break started.')
+ 		}
+ 		
+ 		function StartWorkFromNotification(event) {
+ 			event.preventDefault();
+ 			
+ 			alertl('Notification action='+event.action)
+ 			if ((event.action === 'apply') || (event.action === 'undefined')) {
+ 				StartWork()
+ 			} else if (event.action === 'pause') {
+ 				pauseTmr()
+ 			} else {
+ 				StartWork()
+ 			}
+ 		}
+ 		
+ 		function StartWork() {
+ 			if (!isRunning) {
+ 				startTmr()
+ 			}
+ 			if ((typeof Notif != 'undefined') && Notif !== null) {
+ 				Notif.close();
+ 			}
+ 			isNotifying = false;
+ 			
+ 			
+ 			switch (state) {
+ 				case tmrstate.INIT:
+ 						return;
+ 					break;
+ 				case tmrstate.WORKING:
+						return;
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+ 						return;
+	 				break;
+ 				case tmrstate.ONBREAK:
+ 						// ok
+	 				break;
+ 				case tmrstate.BREAKOVER:
+ 						// ok
+	 				break;
+ 			}
+ 			
+ 			workSessionsStartedNum += 1;
+ 			
+ 			tme = Date.now();
+ 			remDuration = evtTime - tme // negative: elapsed
+ 			
+ 			elaDuration = tme - startTime;
+ 			breakSum+=elaDuration;
+ 			eladstr = duration2txt(elaDuration);
+ 			alertl('Starting work after a break of '+eladstr+'.')
+ 			
+ 			elaDuration = 0;
+ 			startTime = tme
+
+ 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			
+ 			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+ 			bdstr = document.getElementById('breakDuration').value;
+ 			bd = txt2duration(bdstr)
+ 			
+ 			ndstr = document.getElementById('notifyDuration').value;
+ 			nd = txt2duration(ndstr)
+ 			
+ 			remdstr = document.getElementById('remainDuration').value;
+ 			remd = txt2duration(remdstr)
+ 			
+ 			isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
+ 			
+ 			
+ 			
+ 			state = tmrstate.WORKING
+ 							
+			isWorking = true;
+			document.getElementById('rbWrkBrk_Wrk').checked = true
+			document.getElementById('rbWrkBrk_Brk').checked = false
+		
+			dur = wd;
+			evtTime = tme+dur
+		
+			var tmrEvt = window.setTimeout(onTmrEvt, dur)
+			
+			alertl('> Work started.')
+ 		}
+ 		
+ 		
+ 		function tickTmr() {
+ 			dto = new Date()
+ 			statsstr = duration2txt(workSum)+' of work sessions: '+workSessionsStartedNum.toString()+' started ('+workSessionsFinishedNum.toString()+' finished) ' + '  /  ' + duration2txt(breakSum)+' of break sessions: '+breakSessionsStartedNum.toString()+' started ('+ breakSessionsFinishedNum.toString() +' finished)';
+ 			document.getElementById('edtstatus').value= state2str(state) + ", "+ ((isRunning)? 'running':'stopped')
+ 			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
+ 			document.getElementById('edtstatistics').value= statsstr;
+ 			
+ 			if (!isRunning) { 
+ 				return; 
+ 			}
+ 			
+ 			tme = Date.now();
+ 			remDuration = evtTime - tme // negative: elapsed
+ 			elaDuration = tme - startTime
+
+ 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			
+ 			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+ 			bdstr = document.getElementById('breakDuration').value;
+ 			bd = txt2duration(bdstr)
+ 			
+ 			lbdstr = document.getElementById('longBreakDuration').value;
+ 			lbd = txt2duration(lbdstr)
+ 			
+ 			lbastr = document.getElementById('longBreakAfter').value;
+ 			lba = parseInt(lbastr)
+ 			
+ 			enableLongbreaks = document.getElementById('cbEnableLongBreaks').checked;
+ 			
+ 			ndstr = document.getElementById('notifyDuration').value;
+ 			nd = txt2duration(ndstr)
+ 			
+ 			remdstr = document.getElementById('remainDuration').value;
+ 			remd = txt2duration(remdstr)
+ 			
+ 			eladstr = document.getElementById('elapsedDuration').value;
+ 			elad = txt2duration(eladstr)
+ 			
+ 			isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
+			onclickfn = null;
+			
+ 			switch (state) {
+ 				case tmrstate.INIT: // this should never happen
+ 					break;
+ 					
+ 				case tmrstate.WORKING:
+ 					if (remDuration < 0) {
+ 						if (!autoswitch) {
+ 							state = tmrstate.BREAKREQUIRED
+ 							
+ 							workSessionsFinishedNum += 1;
+ 							
+ 							onclickfn = window['StartBreakFromNotification'];
+ 							applymsg = 'Start my break';
+ 							alertl('> Break required.')
+ 						} else {
+ 							state = tmrstate.BREAKREQUIRED
+ 							workSessionsFinishedNum += 1;
+ 							
+ 							 							if (document.getElementById('cbPlayAudio').checked) {
+				 				try {
+				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
+				 				  alertl('Play audio '+audiofile);
+				 				} catch(err) {
+								  alertl(err.message);
+								}
+				 			}
+ 							
+ 							alertl('> Break required, autostarting break...')
+ 							
+ 							StartBreak();
+ 							
+ 							tme = Date.now();
+				 			remDuration = evtTime - tme // negative: elapsed
+				 			elaDuration = tme - startTime
+	 						
+ 						}
+ 					}
+ 				
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+	 				break;
+ 				case tmrstate.ONBREAK:
+ 					if (remDuration < 0) {
+ 						if (!autoswitch) {
+ 							state = tmrstate.BREAKOVER
+ 							
+ 							breakSessionsFinishedNum += 1;
+ 							
+ 							onclickfn = window['StartWorkFromNotification'];
+ 							applymsg = 'Start working';
+ 							alertl('> Break over.')
+ 						} else {
+ 							state = tmrstate.BREAKOVER
+ 							breakSessionsFinishedNum += 1;
+ 							
+ 							if (document.getElementById('cbPlayAudio').checked) {
+				 				try {
+				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
+				 				  alertl('Play audio '+audiofile);
+				 				} catch(err) {
+								  alertl(err.message);
+								}
+				 			}
+ 							
+ 							alertl('> Break over, autostarting work...')
+ 							StartWork();
+ 							
+ 							tme = Date.now();
+				 			remDuration = evtTime - tme // negative: elapsed
+				 			elaDuration = tme - startTime
+	 						
+ 						}
+ 					}
+	 				break;
+ 				case tmrstate.BREAKOVER:
+	 				break;
+ 			}
+ 			
+ 			document.getElementById('frmTmr').className = state.toString();
+ 			
+ 			if (Math.abs(remDuration) < nd) {
+ 				document.getElementById('frmTmr').classList.add('notify');
+ 				if ((!isNotifying) && (onclickfn !== null)) {
+ 					isNotifying = true;
+ 					if (document.getElementById('cbDesktopNotify').checked) {
+ 						alertl('Notifying...');
+ 						Notif = showDesktopNotification(state2str(state), state2strlong(state), state.toString()+'.png', onclickfn, null, applymsg);
+ 					}
+ 					
+ 					if (document.getElementById('cbPlayAudio').checked) {
+		 				try {
+		 				  //var audiofile = state.toString()+'.mp3';
+		 				  //var audio = new Audio(audiofile); audio.play();
+		 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
+		 				  
+		 				  alertl('Play audio '+audiofile);
+		 				} catch(err) {
+						  alertl(err.message);
+						}
+		 			}
+ 				}
+ 			} else if ((remDuration) < (-1)*nd) {
+ 				document.getElementById('frmTmr').classList.add('notifyoverdue')
+ 			}
+ 			
+ 			subsymbol = ''
+ 			if ((remDuration >= 0) && (remDuration <= nd)) {
+ 				subsymbol = '_ending';
+ 			}
+ 			
+ 			
+ 			remdstr = duration2txt(remDuration);
+ 			document.getElementById('remainDuration').value = remdstr;
+ 			
+ 			eladstr = duration2txt(elaDuration);
+ 			document.getElementById('elapsedDuration').value =eladstr;
+ 			
+ 			wbtme = new Date(evtTime)
+ 			wrkbrktimestr = fmtDateTime(wbtme);
+ 			document.getElementById('WrkBrkTime').value = wrkbrktimestr;
+ 			
+ 			tmeobj = new Date(tme)
+ 			tmestr = fmtDateTime(tmeobj);
+ 			document.getElementById('DateTime').value = tmestr;
+ 			
+ 			document.getElementById('symbolimg').src = state.toString()+subsymbol+'.png';
+ 			
+ 			
+ 			document.getElementById('workSum').value = duration2txt(workSum);
+ 			document.getElementById('breakSum').value = duration2txt(breakSum);
+ 			
+ 		}
+ 		
+ 		function fmtDateTime(dto) {
+ 			str = prepad(dto.getFullYear(),4,'0') +'-'+ prepad(dto.getMonth()+1,2,'0') +'-'+ prepad(dto.getDate()+1,2,'0') +' '+prepad(dto.getHours(),2,'0')+":"+prepad(dto.getMinutes(),2,'0')+":"+prepad(dto.getSeconds(),2,'0')+""
+ 			return str;
+ 		}
+ 		
+ 		
+ 		function handleValid (el,res) {
+ 			if (!res) {
+ 				el.classList.remove('is-valid');
+ 				el.classList.add('is-invalid');
+ 			} else {
+ 				el.classList.remove('is-invalid');
+ 				el.classList.add('is-valid');
+ 			}
+ 		}
+ 		
+ 		function txt2duration(str) {
+ 			arr = str.split(':');
+ 			switch (arr.length) {
+ 				case 2: 
+ 					h = parseInt(arr[0],10); 
+ 					m = parseInt(arr[1],10);
+ 					s = 0;
+ 					break;
+ 				case 3: 
+ 					h = parseInt(arr[0],10); 
+ 					m = parseInt(arr[1],10);
+ 					s = parseInt(arr[2],10);
+ 					break;
+ 				default: 
+ 					h = 0;
+ 					m = 5;
+ 					s = 0;
+ 				
+ 			}
+ 			sgn = 1;
+ 			if (h<0) {
+ 				h=h*(-1);
+ 				sgn = sgn*(-1);
+ 			}
+ 			
+ 			if (m<0) {
+ 				m=m*(-1);
+ 				sgn = sgn*(-1);
+ 			}
+ 			
+ 			if (s<0) {
+ 				s=s*(-1);
+ 				sgn = sgn*(-1);
+ 			}
+ 			
+ 			dur = sgn*(h*60*60 + m*60 + s);
+ 			return dur*1000;
+ 		}
+ 		
+		function prepad(n, width, z) {
+		  z = z || '0';
+		  n = n + '';
+		  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+		}
+ 		
+ 		function duration2txt(dur) {
+ 			if (dur < 0) {
+ 				dur = dur*(-1);
+ 				sgn = '-';
+ 			} else {
+ 				sgn = '';
+ 			}
+ 			
+ 			dur = dur/1000; // ms to sec
+ 			
+ 			h = Math.floor(dur/(60*60))
+ 			m = Math.floor((dur-h*60*60)/(60))
+ 			s1 = ((dur-h*60*60 -m*60))
+ 			s = Math.round(s1);
+ 			
+ 			txt = sgn + prepad(h.toString(),2,'0') + ':' + prepad(m.toString(),2,'0') + ':' + prepad(s.toString(),2,'0');
+ 			return txt;
+ 		}
+ 		
+ 		
+ 		function validateInput() {
+ 			result = true;
+ 			//var el = document.querySelectorAll('#workDuration')[0];
+ 			var el = document.getElementById('workDuration');
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			var el = document.getElementById('breakDuration')
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			var el = document.getElementById('longBreakDuration')
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			var el = document.getElementById('longBreakAfter')
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			var el = document.getElementById('notifyDuration')
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			var el = document.getElementById('remainDuration')
+ 			var res = el.checkValidity();
+ 			handleValid(el,res);
+ 			result = result && res;
+ 			
+ 			
+ 			return result;
+ 			
+ 		}
+ 		
+ 		
+ 		function showDesktopNotification(title, msg, iconurl, onclickfn, onclosefn, applymsg) {
+ 			
+		    if (!window.Notification) {
+				alertl('Browser does not support notifications.');
+			} else {
+				// check if permission is already granted
+				if (Notification.permission === 'granted') {
+					// show notification here
+					var notify = new Notification(title, {
+						body: msg,
+						icon: iconurl,
+						requireInteraction: true,
+						onclick: onclickfn,
+						onclose: onclosefn,
+						/*actions: [
+									{ action: 'apply',
+									  title: applymsg  },
+									{ action: 'pause',
+									  title: 'Pause Tmr'  },
+								  ],*/
+					});
+					notify.onclick = onclickfn;
+					notify.onclose = onclosefn;
+					return notify;
+				} else {
+					// request permission from user
+					Notification.requestPermission().then(function (p) {
+						if (p === 'granted') {
+							// show notification here
+							var notify = new Notification(title, {
+								body: msg,
+								icon: iconurl,
+								requireInteraction: true, 
+								onclick: onclickfn,
+								onclose: onclosefn,
+								/*actions: [
+											{ action: 'apply',
+											  title: applymsg  },
+											{ action: 'pause',
+											  title: 'Pause Tmr'  },
+										  ],*/
+							});
+							notify.onclick = onclickfn;
+							notify.onclose = onclosefn;
+						} else {
+							console.log('User blocked notifications.');
+							alertl('User blocked notifications.');
+						}
+					}).catch(function (err) {
+						console.error(err);
+						alertl(err);
+					});
+					return notify;
+				}
+			}
+		}
+ 	</script>
+ </head>
+ 
+ <body>
+ 
+ 	<header>
+ 		<nav>
+ 		</nav>
+ 	</header>
+ 
+ 	<h1>Work/Break Tmr</h1>
+ 
+ 	<!-- content goes here -->
+ 	<form action="#" id="frmTmr">
+ 		<fieldset id="settings">
+	  	<legend>Settings</legend>
+		  <label for="workDuration">Work Duration:</label>
+		  <input type="text" id="workDuration" name="workDuration" pattern="([\d]{2}:[\d]{2}|[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:15:00"> <br/>
+		  
+		  <label for="breakDuration">Break Duration:</label>
+		  <input type="text" id="breakDuration" name="breakDuration" pattern="([\d]{2}:[\d]{2}|[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:05:00"> <br/>
+		  
+		  <label for="longBreakDuration">Long Break Duration:</label>
+		  <input type="text" id="longBreakDuration" name="longBreakDuration" pattern="([\d]{2}:[\d]{2}|[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:20:00"> <br/>
+		  
+		  <label for="longBreakAfter">Sessions before long break:</label>
+		  <input type="text" id="longBreakAfter" name="longBreakAfter" pattern="[\+\-]*[\d]+" title="Use integer value, or disable with negative value" value="3"> <br/>
+		  
+		  <label for="notifyDuration">Notify Duration:</label>
+		  <input type="text" id="notifyDuration" name="notifyDuration" pattern="([\d]{2}:[\d]{2}|[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:01:00"> <br/>
+		  
+		  <input type="checkbox" id="cbAutoSwitch" name="cbAutoSwitch" value="1" /><label for="cbAutoSwitch" class="checkbox">Switch to currently working/on break automatically on next event</label> <br/>
+		  	
+		  <input type="checkbox" id="cbEnableLongBreaks" name="cbEnableLongBreaks" value="1" checked /><label for="cbEnableLongBreaks" class="checkbox">Enable long breaks after above specified work session count</label> <br/>
+		  	
+		  <input type="checkbox" id="cbLongbreaksCountOnlyCompletedWork" name="cbLongbreaksCountOnlyCompletedWork" value="1" /><label for="cbLongbreaksCountOnlyCompletedWork" class="checkbox">Count only full work sessions towards long breaks (count started work session if unchecked)</label> <br/>
+		  	
+		  <input type="checkbox" id="cbDesktopNotify" name="cbDesktopNotify" value="1" checked /><label for="cbDesktopNotify" class="checkbox">Show Desktop Notifications (if allowed by browser)</label> <br/>
+		  	
+		  <input type="checkbox" id="cbPlayAudio" name="cbPlayAudio" value="1" checked /><label for="cbPlayAudio" class="checkbox">Play Audio Notifications (if allowed by browser)</label> <br/>
+		  
+		  
+		  <input type="button" onClick="validateInput()" value="Check">
+		  Presets: 
+		  <a href="" onClick="document.getElementById('workDuration').value='00:15:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:20:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">RSI1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:15:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">Pomodoro 1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:30:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">Pomodoro 2</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitch').checked=false; return false;">Debug1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='-1'; document.getElementById('cbEnableLongBreaks').checked=false; document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitch').checked=true;  return false;">Debug2</a>
+	  </fieldset>
+	  <br/>
+
+	  <fieldset id="rdWB">
+	  	<legend>Currently</legend>
+	  	<input type="radio" id="rbWrkBrk_Wrk" name="rbWrkBrk" value="Work" checked /><label for="rbWrkBrk_Wrk" class="radio">Working</label> <br/>
+	  	<input type="radio" id="rbWrkBrk_Brk" name="rbWrkBrk" value="Break" /><label for="rbWrkBrk_Brk" class="radio">On Break</label> <br/>
+	  </fieldset>
+	  <br/>
+
+	  <fieldset id="status">
+		  <legend>Status</legend>	  
+		  
+		  <label for="elapsedDuration">Elapsed Duration:</label>
+		  <input type="text" id="elapsedDuration" name="elapsedDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  <label for="remainDuration">Remaining Duration:</label>
+		  <input type="text" id="remainDuration" name="remainDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  <label for="DateTime">Current Date, Time:</label>
+		  <input type="text" id="DateTime" name="DateTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"> <br/>
+		  <label for="WrkBrkTime">Next Work/Break at:</label>
+		  <input type="text" id="WrkBrkTime" name="WrkBrkTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"> <br/>
+		  <label for="edtstatus">Status:</label>
+		  <input type="text" id="edtstatus" name="edtstatus" value="" size="50"> <br/>
+	  </fieldset>
+	  <br/>
+	  
+	  <fieldset id="actions">
+		  <legend>Actions</legend>	  
+		  
+		  <input type="button" class="btnBig" id="btnWork" onClick="StartWork()" value="Start/Resume Working">
+		  <input type="button" class="btnBig" id="btnBreak" onClick="StartBreak()" value="Take Break">
+		  <input type="button" class="btnBig" id="btnPause" onClick="pauseTmr()" value="Pause Tmr">
+		  <input type="button" class="btnBig" id="btnResume" onClick="startTmr()" value="Start/Resume Tmr">
+	  </fieldset>
+	  <br/>
+	  
+	  <input type="reset">
+	  <input type="submit">
+	  <input type="button"  id="btnClearSessionCounts" onClick="clearSessionCounts()" value="Clear Session Counters">
+	  <input type="button"  id="btnClrLog" onClick="document.getElementById('tlog').value ='';" value="Clear Log">
+	  
+	  <br/>
+	  <label for="tlog" class="tlog">Log:</label> <br/>  
+	  <textarea cols="55" rows="10" id="tlog"></textarea>
+	  <img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px;" id="symbolimg">
+	</form>
+ 	
+ 	<audio id="audio_breakover">
+	  <source src="breakover.mp3" type="audio/mpeg">
+	  <source src="breakover.wav" type="audio/wave">
+	  Your browser does not support the audio element.
+	</audio>
+	
+	<audio id="audio_breakrequired">
+	  <source src="breakrequired.mp3" type="audio/mpeg">
+	  <source src="breakrequired.wav" type="audio/wave">
+	  Your browser does not support the audio element.
+	</audio>
+ 		
+ 		
+ 		
+ 	<footer>
+ 		<form id="sums" action="#">
+ 		  <label for="workSum">Total Work Duration:</label>
+		  <input type="text" id="workSum" name="workSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  <label for="breakSum">Total Break Duration:</label>
+		  <input type="text" id="breakSum" name="breakSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  
+		  <label for="edtstatus" class="nowidth">Statistics:</label>
+		  <input type="text" id="edtstatistics" name="edtstatistics" value="" size="85"> <br/>
+		  <a href="licenses.htm">Licenses and Acknowledgments</a>
+ 		</form>
+ 	</footer>
+ 
+ </body>
+ 
+ </html>
