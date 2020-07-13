@@ -140,10 +140,18 @@
 						return "You should be working."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
- 						return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
+						if (isLongBreak()) {
+							return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
+						} else {
+							return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
+						}
 	 				break;
  				case tmrstate.ONBREAK:
- 						return "You should be taking a break."
+						if (isLongBreak()) {
+							return "You should be taking a long break."
+						} else {
+							return "You should be taking a break."
+						}
 	 				break;
  				case tmrstate.BREAKOVER:
  						return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
@@ -336,6 +344,41 @@
  		}
  		
  		
+		function isLongBreak() {
+			wdstr = document.getElementById('workDuration').value;
+ 			wd = txt2duration(wdstr)
+ 			
+ 			bdstr = document.getElementById('breakDuration').value;
+ 			bd = txt2duration(bdstr)
+ 			
+ 			lbdstr = document.getElementById('longBreakDuration').value;
+ 			lbd = txt2duration(lbdstr)
+ 			
+ 			lbastr = document.getElementById('longBreakAfter').value;
+ 			lba = parseInt(lbastr)
+ 			
+ 			enableLongbreaks = document.getElementById('cbEnableLongBreaks').checked;
+ 			longbreaksCountFinishedWork = document.getElementById('cbLongbreaksCountOnlyCompletedWork').checked;
+ 			
+ 			dur = -1;
+ 			
+ 			if (longbreaksCountFinishedWork != true) {
+				workSessionsNum = workSessionsStartedNum;
+			} else {
+				workSessionsNum = workSessionsFinishedNum;
+			}
+			
+			// determine if long break
+			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) { 
+				// long break required
+				return true;
+				
+			} else {
+				// standard break
+				return false;
+			}
+		}
+		
  		function determineBreakDuration() {
  			wdstr = document.getElementById('workDuration').value;
  			wd = txt2duration(wdstr)
@@ -363,13 +406,13 @@
 			// determine if long break
 			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) { 
 				// long break required
-				dur = lbd;
+				var dur = lbd;
 				
 			} else {
 				// standard break
-				dur = bd;
+				var dur = bd;
 			}
-			
+			//alertl("DEBUG: bd="+duration2txt(dur))
 			return dur;
  		}
  		
@@ -424,7 +467,8 @@
  			elaDuration = 0;
  			startTime = tme
 
- 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			autoswitchtowork  = document.getElementById('cbAutoSwitchToWork').checked;
+			autoswitchtobreak = document.getElementById('cbAutoSwitchToBreak').checked;
  			
  			//wdstr = document.getElementById('workDuration').value;
  			//wd = txt2duration(wdstr)
@@ -457,7 +501,15 @@
 			document.getElementById('rbWrkBrk_Brk').checked = true
 			document.getElementById('rbWrkBrk_Wrk').checked = false
 			
-			dur = determineBreakDuration()
+			var dur = determineBreakDuration()
+			//alertl("DEBUG2: bd="+duration2txt(dur))
+			var longb = isLongBreak()
+			
+			if (longb) {
+				var msg = ('> Long break (for '+duration2txt(dur)+') started.')
+			} else {
+				var msg = ('> Break (for '+duration2txt(dur)+') started.')
+			}
 		
 			evtTime = tme+dur
 		
@@ -465,7 +517,7 @@
 			
 			breakSessionsStartedNum += 1;
 			
-			alertl('> Break started.')
+			alertl(msg)
  		}
  		
  		function StartWorkFromNotification(event) {
@@ -522,7 +574,8 @@
  			elaDuration = 0;
  			startTime = tme
 
- 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			autoswitchtowork  = document.getElementById('cbAutoSwitchToWork').checked;
+			autoswitchtobreak = document.getElementById('cbAutoSwitchToBreak').checked;
  			
  			wdstr = document.getElementById('workDuration').value;
  			wd = txt2duration(wdstr)
@@ -551,7 +604,7 @@
 		
 			var tmrEvt = window.setTimeout(onTmrEvt, dur)
 			
-			alertl('> Work started.')
+			alertl('> Work started (for '+duration2txt(wd)+').')
  		}
  		
  		
@@ -570,7 +623,8 @@
  			remDuration = evtTime - tme // negative: elapsed
  			elaDuration = tme - startTime
 
- 			autoswitch = document.getElementById('cbAutoSwitch').checked;
+ 			autoswitchtowork  = document.getElementById('cbAutoSwitchToWork').checked;
+			autoswitchtobreak = document.getElementById('cbAutoSwitchToBreak').checked;
  			
  			wdstr = document.getElementById('workDuration').value;
  			wd = txt2duration(wdstr)
@@ -604,7 +658,7 @@
  					
  				case tmrstate.WORKING:
  					if (remDuration < 0) {
- 						if (!autoswitch) {
+ 						if (!autoswitchtobreak) {
  							state = tmrstate.BREAKREQUIRED
  							
  							workSessionsFinishedNum += 1;
@@ -616,10 +670,10 @@
  							state = tmrstate.BREAKREQUIRED
  							workSessionsFinishedNum += 1;
  							
- 							 							if (document.getElementById('cbPlayAudio').checked) {
+ 							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  alertl('Play audio '+audiofile);
+				 				  //alertl('Play audio '+audio);
 				 				} catch(err) {
 								  alertl(err.message);
 								}
@@ -641,7 +695,7 @@
 	 				break;
  				case tmrstate.ONBREAK:
  					if (remDuration < 0) {
- 						if (!autoswitch) {
+ 						if (!autoswitchtowork) {
  							state = tmrstate.BREAKOVER
  							
  							breakSessionsFinishedNum += 1;
@@ -656,7 +710,7 @@
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  alertl('Play audio '+audiofile);
+				 				  //alertl('Play audio '+audiofile);
 				 				} catch(err) {
 								  alertl(err.message);
 								}
@@ -938,7 +992,8 @@
 		  <label for="notifyDuration">Notify Duration:</label>
 		  <input type="text" id="notifyDuration" name="notifyDuration" pattern="([\d]{2}:[\d]{2}|[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:01:00"> <br/>
 		  
-		  <input type="checkbox" id="cbAutoSwitch" name="cbAutoSwitch" value="1" /><label for="cbAutoSwitch" class="checkbox">Switch to currently working/on break automatically on next event</label> <br/>
+		  <input type="checkbox" id="cbAutoSwitchToWork" name="cbAutoSwitchToWork" value="1" /><label for="cbAutoSwitchToWork" class="checkbox">Switch to working automatically after break ends</label> <br/>
+		  <input type="checkbox" id="cbAutoSwitchToBreak" name="cbAutoSwitchToBreak" value="1" /><label for="cbAutoSwitchToBreak" class="checkbox">Switch to break automatically after work session ends</label> <br/>
 		  	
 		  <input type="checkbox" id="cbEnableLongBreaks" name="cbEnableLongBreaks" value="1" checked /><label for="cbEnableLongBreaks" class="checkbox">Enable long breaks after above specified work session count</label> <br/>
 		  	
@@ -951,11 +1006,12 @@
 		  
 		  <input type="button" onClick="validateInput()" value="Check">
 		  Presets: 
-		  <a href="" onClick="document.getElementById('workDuration').value='00:15:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:20:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">RSI1</a>
-		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:15:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">Pomodoro 1</a>
-		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:30:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitch').checked=false; return false;">Pomodoro 2</a>
-		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitch').checked=false; return false;">Debug1</a>
-		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='-1'; document.getElementById('cbEnableLongBreaks').checked=false; document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitch').checked=true;  return false;">Debug2</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:15:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:20:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitchToWork').checked=false; document.getElementById('cbAutoSwitchToBreak').checked=false; return false;">RSI1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:15:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:20:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitchToWork').checked=true;  document.getElementById('cbAutoSwitchToBreak').checked=false; return false;">RSI2</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:15:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitchToWork').checked=false; document.getElementById('cbAutoSwitchToBreak').checked=false; return false;">Pomodoro 1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:25:00'; document.getElementById('breakDuration').value='00:05:00'; document.getElementById('longBreakDuration').value='00:30:00'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:01:00'; document.getElementById('cbAutoSwitchToWork').checked=false; document.getElementById('cbAutoSwitchToBreak').checked=false; return false;">Pomodoro 2</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='3';  document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitchToWork').checked=false; document.getElementById('cbAutoSwitchToBreak').checked=false; return false;">Debug1</a>
+		  <a href="" onClick="document.getElementById('workDuration').value='00:00:12'; document.getElementById('breakDuration').value='00:00:09'; document.getElementById('longBreakDuration').value='00:00:19'; document.getElementById('longBreakAfter').value='3'; document.getElementById('cbEnableLongBreaks').checked=true;  document.getElementById('notifyDuration').value='00:00:05'; document.getElementById('cbAutoSwitchToWork').checked=true;  document.getElementById('cbAutoSwitchToBreak').checked=true;  return false;">Debug2</a>
 	  </fieldset>
 	  <br/>
 
