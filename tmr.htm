@@ -14,7 +14,10 @@
  		h1 {margin: .5ex .25ex .25ex 0ex;}
  		input.is-invalid { background-color: #FFEEEE; }
  		input.is-valid { background-color: #EEFFEE; }
- 		label { min-width: 25ex; display:inline-block; text-align:right; }
+		input#remainDuration { font-weight:bold; }
+		
+ 		label { min-width: 140pt; display:inline-block; text-align:right; margin:0px 2px; padding:0;}
+		label[for=remainDuration] { font-weight:bold; }
  		label.nowidth, label.tlog { min-width:0; text-align:left; }
  		label.radio, label.checkbox { min-width: 17ex; display:inline-block; text-align:left; }
  		label.log { display:inline-block; text-align:left; }
@@ -673,7 +676,7 @@
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  //alertl('Play audio '+audio);
+				 				  alertl('Play audio '+audio.id);
 				 				} catch(err) {
 								  alertl(err.message);
 								}
@@ -710,7 +713,7 @@
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  //alertl('Play audio '+audiofile);
+				 				  alertl('Play audio '+audio.id);
 				 				} catch(err) {
 								  alertl(err.message);
 								}
@@ -747,7 +750,7 @@
 		 				  //var audio = new Audio(audiofile); audio.play();
 		 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
 		 				  
-		 				  alertl('Play audio '+audiofile);
+		 				  alertl('Play audio '+audio.id);
 		 				} catch(err) {
 						  alertl(err.message);
 						}
@@ -1026,13 +1029,13 @@
 		  <legend>Status</legend>	  
 		  
 		  <label for="elapsedDuration">Elapsed Duration:</label>
-		  <input type="text" id="elapsedDuration" name="elapsedDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  <input type="text" id="elapsedDuration" name="elapsedDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"><br/>
 		  <label for="remainDuration">Remaining Duration:</label>
-		  <input type="text" id="remainDuration" name="remainDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  <input type="text" id="remainDuration" name="remainDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"><br/>
 		  <label for="DateTime">Current Date, Time:</label>
-		  <input type="text" id="DateTime" name="DateTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"> <br/>
+		  <input type="text" id="DateTime" name="DateTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"><br/>
 		  <label for="WrkBrkTime">Next Work/Break at:</label>
-		  <input type="text" id="WrkBrkTime" name="WrkBrkTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"> <br/>
+		  <input type="text" id="WrkBrkTime" name="WrkBrkTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"><br/>
 		  <label for="edtstatus">Status:</label>
 		  <input type="text" id="edtstatus" name="edtstatus" value="" size="50"> <br/>
 	  </fieldset>
