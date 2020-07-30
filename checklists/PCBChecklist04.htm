@@ -1,0 +1,1302 @@
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Universal Checklist 04</title>
+	<link rel="icon" href="favicon.svg" type="image/vnd.microsoft.icon">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	
+    <link rel="stylesheet" href="checklist.css">
+    
+    <script type="text/javascript">
+		var CLdocversion = "1.0.2";
+	</script>
+
+    <!--script src="zepto.js"></script-->
+	<!--script src="fx.js"></script-->
+	
+	<script src="jquery.js" type="text/javascript"></script>
+	<script src="sha1.js" type="text/javascript" charset="utf-8"></script>
+	
+
+    <!--script src="velocity.js"></script-->
+	<script src="checklist.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+	
+	<div style="margin:0; padding:0; ">
+    <a name="top"></a><a name="checklistlist"></a>
+    
+    <div class="linklist">
+    <p><a href="PCBChecklistTools.htm">ECAD tools checklist</a> | </p>
+	<p><a href="#goto_PROCESS">Process</a> | </p>
+	<p><a href="#goto_SYS">System</a> ( <a href="#goto_SYS_INTERFACES">Interfaces</a> | <a href="#goto_SYS_STATUS">Status</a> | <a href="#goto_SYS_SUBSYS">Subsystems</a> | <a href="#goto_SYS_COMM">Communication</a> | <a href="#goto_SYS_WATCHDOG_RESET">Watchdog</a> | <a href="#goto_SYS_CHARACTER">Characteristics</a> | <a href="#goto_SYS_POWER">Power</a> | <a href="#goto_SYS_CLK">Clocks and oscillators</a> | <a href="#goto_SYS_TEST">Testing</a> | <a href="#goto_SYS_MAINT">Maintainability</a> | <a href="#goto_SYS_SAFETY">Safety</a> | <a href="#goto_SYS_EMC">EMC</a> | <a href="#goto_SYS_FMA">Failure mode analysis</a> ) </p>
+	<p><a href="#goto_CMP">Components</a> | </p>
+	<p><a href="#goto_SCH">Schematic</a> ( <a href="#goto_SCH_SETUP">Set up</a> | <a href="#goto_SYM">Symbols</a> | <a href="#goto_SCH_FUNC">Functionality</a> | <a href="#goto_SCH_ELECTRICAL">Electrical</a> | <a href="#goto_SCH_PITFALLS">Pitfalls</a> | <a href="#goto_SCH_CONNECTORS">Connectors</a> | <a href="#goto_SCH_TRANSISTORCIRCUITS">Transistor</a> | <a href="#goto_SCH_POWERSUPPLY">Power</a> | <a href="#goto_SCH_OpAmpAnalog">Analog</a> | <a href="#goto_SCH_Digital">Digital</a> | <a href="#goto_SCH_BUSSES">Busses</a> | <a href="#goto_SCH_HS">High-Speed</a> | <a href="#goto_SCH_RF">RF</a> | <a href="#goto_SCH_uC">Microcontroller</a> | <a href="#goto_SCH_FPGA">CPLD/FPGA</a> | <a href="#goto_SCH_EMC">EMC/EMI</a> | <a href="#goto_SCH_SI">SI</a> | <a href="#goto_SCH_TESTING">Test</a> | <a href="#goto_SCH_DOCU">Documentation</a> | <a href="#goto_RefDes">RefDes</a> | <a href="#goto_SCH_DRAFTING">Drafting</a> | <a href="#goto_SCH_SHEETS">Sheets</a> | <a href="#goto_ERC">ERC</a> ) </p>
+	<p><a href="#goto_PCB">PCB</a> ( <a href="#goto_PCB_TECH">Technology</a> | <a href="#goto_PCB_FLP">Floorplan</a> | <a href="#goto_PCB_FP">Footprints</a> | <a href="#goto_PCB_PLACEMENT">Placement</a> | <a href="#goto_PCB_MECH">Mechanical</a> | <a href="#goto_PCB_ELECTRICAL">Electrical</a> | <a href="#goto_PCB_SI">SI</a> | <a href="#goto_PCB_EMC_EMI">EMC/EMI</a> | <a href="#goto_RFPCB">RF</a> | <a href="#goto_PCB_PLANES">Polygons</a> | <a href="#goto_PCB_ROUTING">Routing</a> | <a href="#goto_PCB_THERMAL">Thermal</a> | <a href="#goto_PCB_PITFALLS">Pitfalls</a> | <a href="#goto_PCB_PROTO">Prototypes</a> | <a href="#goto_PCB_TEST">Testing</a> | <a href="#goto_REPAIR">Maintenance</a> | <a href="#goto_SILKSCR">Silkscreen</a> | <a href="#goto_PCB_HEADER">Header</a> | <a href="#goto_CLEARANCES">Clearance</a> | <a href="#goto_PANELIZATION">Panelization</a> | <a href="#goto_ASSEMBLY">Assembly</a> | <a href="#goto_PCB_DFM">DFM</a> | <a href="#goto_MANUFACTDOCS">Manufacturing docs</a> | <a href="#goto_STACKUP">Stackup</a> | <a href="#goto_BOM">BOM</a> | <a href="#goto_TAPEOUT">Check output</a> | <a href="#goto_PCB_FINAL">Final</a> ) </p>
+	<p><a href="#goto_ORDER">Ordering</a> | <a href="#goto_INSP">Inspection</a> | <a href="#goto_WIRE">Wire harness</a> | <a href="#goto_DRAW">Mechanical Drawings</a> | <a href="#goto_SW">Software</a> | <a href="#goto_DOC">Documentation</a> | </p>
+    
+	<p style="margin-top:1ex;"><a href="#SaveLoad">Save/Load</a> |</p>
+	</div>
+	<div style="margin:0; padding:0; font-size:0.8em">Usage: use appropriate checklists. Checked state can be exported as ID-list (see buttons below) and re-imported from ID-list. ID lists are great to save checklist state with design files. <br>
+	Some functions require you to press ctrl or shift while clicking for safety reasons.</div>
+	</div>
+	
+	
+	<form name="frmChecklist" id="frmChecklist" action="">
+	
+	
+	<a name="CL0"></a>
+	<div class="checklist">
+		
+	<h1>PCB Checklist <a class="cite" href="https://pcbchecklist.com/">source: [Henrik Enggaard Hansen, pcbchecklist.com]</a> <a class="cite" href="http://aqdi.com/articles/electronics-design-checklist-3/">[Hank Wallace, aqdi.com]</a> <a class="cite" href="http://www.electronic-products-design.com/geek-area/electronics/pcb-design/general-pcb-design/a-good-pcb-design-checklist">[ibexuk.com]</a> &nbsp;</h1> 
+
+	<ol>
+		<li class="MISC" id="PROCESS"><h2>Process</h2>
+			<ol>
+				<li>Is there an established process for requirements analysis and management?
+					<ol>
+						<li>To get real requirements</li>
+						<li>To manage and track changing requirements</li>
+						<li>For verification and validation of system requirements against user/stakeholder requirements</li>
+						<li class="t-software">For software (e.g. agile methodologies)</li>
+					</ol>
+				</li>
+				<li>Teamwork &amp; collaboration
+					<ol>
+						<li>Is there an agreed upon workflow </li>
+						<li>Is the workflow documented and the ducumentation up to date</li>
+						<li>Are interfaces and upcoming issues discussed early</li>
+						<li>Responsibilities are clearly defined</li>
+						<li>Issues are discussed in a civil manner. <span class="note">(Putting pressure on people makes them succeptible to make more errors, not less.)</span></li>
+						<li>Is there an atmosphere of trust and understanding, so that issues are discussed early and often? <span class="note">(The goal is to find solutions and develop better practices, not to dispense blame.)</span></li>
+					</ol>
+				</li>
+				<li>Is there a method of tracking versions/revisions?
+					<ol>
+						<li>For system</li>
+						<li>For schematics</li>
+						<li>For <abbr title="Printed circuit board">PCBs</abbr></li>
+						<li class="t-software">For software</li>
+					</ol>
+				</li>
+				<li>Is source version control used? (Git, SVN etc.)</li>
+				<li>Is offsite backup used?</li>
+				<li>Are design decisions documented?
+					<ol>
+						<li>Within or separate from the schematics/drawings/code?</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+		<li class="SYS" id="SYS"><h2>System</h2>
+			<ol>
+				<li>What should have <abbr title="Electrostatic discharge">ESD</abbr> protection?</li>
+				<li>Are amplifier circuits stable?</li>
+				<li>Is there a simulation/simulator of the system or subsystems?</li>
+				<li>Has the design or subsystems of it been simulated?</li>
+				<li id="SYS_INTERFACES">What kind of interfaces and connections are necessary?
+					<ol>
+						<li id="C002">For humans?</li>
+						<li>For computers / control software?</li>
+						<li>For power?</li>
+						<li>For other subsystems?</li>
+					</ol>
+				</li>
+				<li id="SYS_STATUS">Are there status <abbr title="Light-emitting diode">LEDs</abbr>
+					<ol>
+						<li>Power</li>
+						<li>Programmable</li>
+					</ol>
+				</li>
+				<li id="SYS_SUBSYS">Subsystems
+					<ol>
+						<li>Are multiple boards needed?</li>
+						<li>How are subsystems connected?</li>
+						<li>Is there a breakout board for subsystem connectors?</li>
+						<li>Have harnesses/wiring/connectors been identified?
+							<ol>
+								<li>Have pin-outs been defined and specified?</li>
+								<li>What is the max current draw?</li>
+							</ol>
+						</li>
+						<li>Should any subsystems be default off? #power</li>
+					</ol>
+				</li>
+				<li id="SYS_COMM">Communication
+					<ol>
+						<li>Which busses/protocols will be used?
+							<ol>
+								<li>Between subsystems?</li>
+								<li>Between chips/modules?</li>
+							</ol>
+						</li>
+						<li>Has addresses been allocated?</li>
+					</ol>
+				</li>
+				<li id="SYS_WATCHDOG_RESET">Watchdog and reset
+					<ol>
+						<li>Can the watchdog be bypassed? #testing</li>
+						<li>Can it be overruled? #testing</li>
+						<li>Can it be emulated? #testing</li>
+						<li>What interval is necessary? #safety</li>
+						<li>Is the worst case behavior documented?</li>
+						<li>Should reset be pulled to default on or off?</li>
+					</ol>
+				</li>
+				<li id="SYS_CHARACTER">System characteristics
+					<ol>
+						<li>Is there a power budget?</li>
+						<li>Estimated power dissipation of each subsystem?</li>
+						<li>Estimated current draw of each subsystem?</li>
+						<li>Estimated expected operating temperature?</li>
+					</ol>
+				</li>
+				<li id="SYS_POWER">Power
+					<ol>
+						<li>How is power provided?</li>
+						<li>Is power-up well-defined?
+							<span class="note">Some subsystems might need to be unpowered before other subsystems are powered, e.g. <abbr title="Light-emitting diode">LED</abbr> drivers unpowered until the software has booted.<br />
+							Certain components such as complex microprocessors, <abbr title="Field programmable gate array">FPGAs</abbr> and other complex <abbr title="Integrated circuit">ICs</abbr> need special power sequencing to operate correctly; consult datasheets for details.</span></li>
+						<li>Is power-down well-defined?</li>
+						<li>Should any subsystems be isolated?</li>
+						<li>Which voltage levels are needed?</li>
+						<li>Which current draws are needed?</li>
+						<li>Is there a shared power supply?
+							<ol>
+								<li>Can it deliver sufficient power for all connected subsystems?</li>
+							</ol>
+						</li>
+						<li>Is the ground connection made first in hot-plugging connectors?</li>
+						<li>Is a separate earth necessary?</li>
+						<li>Will under or over voltage protection be needed?</li>
+					</ol>
+				</li>
+				<li id="SYS_CLK">Clocks and oscillators
+					<ol>
+						<li>Frequency linewidth/jitter are within tolerances across all environments?
+							<span class="note">Clocks and oscillators are not perfect. Their frequency jitter can vary with temperature and other environmental factors.</span></li>
+						<li>Driving ICs support crystals if crystals are used?</li>
+						<li class="t-FPGA">Input rules for clocks are followed?
+							<span class="note">FPGAs' have multi clock capable input pins, but the features available differ from pin to pin. Source: <a href="https://www.eevblog.com/forum/microcontrollers/choosing-a-clock-input-pin-for-an-fpga/">Choosing a Clock Input Pin for an FPGA</a></span></li>
+					</ol>
+				</li>
+				<li id="SYS_TEST">Testing
+					<ol>
+						<li>Test points on <abbr title="Printed circuit board">PCB</abbr> for critical circuits?</li>
+						<li>Test pads for flying probe/bed-of-nails/pogos setups?</li>
+						<li>Has a test procedure been written?</li>
+						<li>Are special connectors needed for testing?</li>
+						<li>Are special peripheral circuitry needed for testing?
+							<ol>
+								<li>Breakout boards for connectors?</li>
+							</ol>
+						</li>
+						<li>Is special equipment needed for testing?</li>
+						<li>Should there be in-circuit testing?
+							<ol>
+								<li>Voltage monitoring?</li>
+								<li>Current monitoring?</li>
+								<li>Temperature monitoring?</li>
+								<li>Peripheral device behavior</li>
+								<li>Board revision or version <span class="note">The board revision or version can be made software readable using either GPIO or shift register pins tied to ground or supply.  An ADC can also be used to read a voltage spanider. This can also be used for board specific functionality. <a href="https://www.designnews.com/electronics-test/5-tips-versioning-embedded-systems/93647737161546">5 Tips for Versioning Embedded Systems - Design News</a></span></li>
+							</ol>
+						</li>
+						<li>Is there event/data logging?
+							<ol>
+								<li>Voltage monitoring?</li>
+								<li>Current monitoring?</li>
+								<li>Temperature monitoring?</li>
+								<li>Connections/disconnects?</li>
+								<li>Peripheral device states?</li>
+								<li>Battery health?</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				<li id="SYS_MAINT">Maintainability
+					<ol>
+						<li>Is disassembly easy?</li>
+						<li>Is reassembly easy?</li>
+					</ol>
+				</li>
+				<li id="SYS_SAFETY">Safety
+					<ol>
+						<li>Fuses
+							<ol>
+								<li>Appropriately sized?</li>
+								<li>Fast enough for the load?</li>
+								<li>Replaceable when board is assembled</li>
+								<li>Replaceable when devices is assembled</li>
+								<li>Storage for spare fuse?</li>
+							</ol>
+						</li>
+						<li>Can connections be mated in an unsafe way?</li>
+						<li>Do connectors for different purposes share the same type of plug/socket?</li>
+						<li>Is signal and power avoided in same connector?
+							<span class="note">Wide Band Laboratory Fire, Fermi National Accelerator Laboratory, 1987.<br />A misjoined connector resulted in several amps being drawn through cables rated for only 1&nbsp;A. A fire started from this. Source: <a href="http://www.tvsfpe.org/_images/zamirowski_&_tess_-_wide_band_fire.pdf">Wide Band Laboratory Fire</a></span>
+						</li>
+						<li>safety regulations
+							<ol>
+								<li>shock hazard warnings and prevention / covers</li>
+								<li>radiated energy warnings and shields</li>
+								<li>applicable standards checked</li>
+								<li>protection against liquids and foreign objects</li>
+								<li>removed / opened casing detected and handled</li>
+								<li>laws and industry standards observed</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				<li id="SYS_EMC"><abbr title="Electromagnetic compatibility">EMC</abbr>
+					<ol>
+						<li> Requirements
+							<ol>
+								<li> What noise frequencies are emitted? (e.g. clock and <abbr title="Switched-mode power supply">SMPS</abbr> frequencies) </li>
+								<li> What noise frequencies is the circuit sensitive to?</li>
+								<li> What noise will be generated by connected devices? (e.g. mains adaptors) </li>
+								<li> What countries will the product be sold in? What standards cover these countries? </li>
+								<li> What is the end use for the product? Does this have any specific <abbr title="Electromagnetic compatibility">EMC</abbr> requirements ?
+									<span class="note">
+									Industrial or automotive use has different test requirements and permissable emission levels than consumer goods. For industrial, the levels are usually higher. See <a href="https://www.conformance.co.uk/adirectives/doku.php?id=emc#tests">Conformance UK's guide </a>
+									</span> 
+								</li>
+							</ol>
+						</li>
+						<li>Prevention
+							<ol>
+								<li>Do switching supplies have (or have an option for) <abbr title="Resistor-capacitor">RC</abbr> snubbers?
+									<span class="note">While not always needed for stability, an <abbr title="Resistor-capacitor">RC</abbr> snubber can dampen ringing oscillations, which result in high frequency noise that may exceed <abbr title="Electromagnetic compatibility">EMC</abbr> limits.</span>
+								</li>
+								<li>Is differential signalling used for digital signals where possible? 
+									<span class="note"> Differential signals are not only more immune to noise, but emit less as well. For high speed, long signal lines (e.g. remote displays in automotive), the difference can be considerable.
+									</span>
+								</li>
+								<li>Is differential signalling used for analog signals? </li>
+								<li>Are shielded connectors needed? </li>
+								<li>Is a shielded case needed? How will this be bonded to ground? </li>
+								<li>Are switched-mode power supplies synchronized? 
+									<span class="note"> 
+									If switch mode power supplies are powered from the same source and are not syncronized, they can produce "beat" frequencies from being out of phase, and input and output ripple is also increased. See <a href="https://www.eetimes.com/author.asp?section_id=183&doc_id=1323282"> <abbr title="Texas Instruments">TI</abbr> Power Tip 73: Synchronizing Makes for Well-Behaved Power Supplies </a>
+									</span>
+								</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				<li id="SYS_FMA">Failure mode analysis
+					<ol>
+						<li>Loss of ground pins on connector</li>
+						<li>Effect of lost connection
+							<ol>
+								<li>Between subsystems</li>
+								<li>To computer</li>
+							</ol>
+						</li>
+						<li>System behavior when battery is fully discharged?</li>
+						<li>Effects of voltage transients and high voltages on <abbr title="Field-effect transistor">FETs</abbr></li>
+						<li>Expected failure modes of failed semiconductors
+							<ol>
+								<li>Expected effects of failed semiconductors</li>
+							</ol>
+						</li>
+						<li>Are component ratings derated by expected operating temperature/voltage/current?</li>
+						<li>Environmental tolerance
+							<ol>
+								<li>Vibration</li>
+								<li>Heating</li>
+								<li>Radiation</li>
+								<li>Humidity</li>
+								<li>Magnetism</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+		<li class="CMP" id="CMP"><h2>Components</h2>
+			<ol>
+				<li>Are the necessary components in stock?
+					<ol>
+						<li>With a margin for defects/failures/loss?</li>
+						<li>With a margin for spill from Pick-and-Place machine?</li>
+					</ol>
+				</li>
+				<li>Are voltage ratings of components sufficient?</li>
+				<li>Part obsolescence review</li>
+				<li>Updated pricing info checked</li>
+				<li>ROHS compliance requirement review</li>
+				<li>Are there multiple sources?</li>
+				<li>Are there alternate manufacturers?</li>
+				<li>Are suitable alternatives identified?</li>
+				<li>Have errata sheets been checked?</li>
+				<li>Is reset active-high or active-low?</li>
+				<li>Do any pins need biasing / pull-up / pull-down / strap?
+					<ol>
+						<li>During initialization?</li>
+						<li>For addresses?</li>
+					</ol>
+				</li>
+				<li>Are some functions only available in certain modes?</li>
+				<li>Are the inputs and outputs organized in banks?</li>
+				<li>Check pin numbers of all custom-generated parts</li>
+				<li>Component/Part/<a href="#goto_SYM">Symbol</a>/<a href="#goto_FP">Footprint</a> review passed<a href="#goto_SYM"></a> </li>
+			</ol>
+		</li>
+		
+		<li class="Sch" id="SCH"><h2>Schematic</h2>
+			<ol>
+				<li id="SCH_SETUP">Set up
+					<ol>
+						<li>Has <abbr title="Design rule check">DRC</abbr> been set up and configured?</li>
+						<li>Has a grid size been picked</li>
+						<li>Has paper sizes been selected for sheets?</li>
+					</ol>
+				</li>
+				<li id="SYM">Symbols
+					<ol>
+						<li>Are explicit and informative</li>
+						<li>Do they resemble electrical circuit symbols?</li>
+						<li>Mark internal pull-up/-down</li>
+						<li>Mark internal termination</li>
+						<li>Reflect the functionality or logical structure of the component <span class="note">In contrast to placing pins as the physically appear on the device. Schematics should reflect functionality; board layout should reflect physical reality. Physical pin layout has its merit in making debugging easier -- however, so does having a clearer schematic.</span></li>
+						<li>Pins are assigned the correct type (passive, power, in, out etc.)</li>
+						<li>Active-high and active-low marked consistently</li>
+						<li>Inverting inputs marked consistently</li>
+						<li>Power (and ground) pins consistently placed and marked</li>
+						<li>Do pin positions adhere to the selected grid size <span class="note">If the the pins are off grid, connections might not be made. </span></li>
+					</ol>
+				</li>
+				<li id="SCH_FUNC">Functionality
+					<ol>
+						<li>Are all pins on all <abbr title="Integrated Circuit">ICs</abbr> handled?
+							<ol>
+								<li>Beak-out of extra pins from <abbr title="Integrated circuit">ICs</abbr> or subsystems?</li>
+							</ol>
+						</li>
+						<li>Have necessary inputs been <abbr title="Electrostatic discharge">ESD</abbr> protected? #ESD
+							<span class="note">A typical solution would be current limiting resistors, clamping diodes.</span>
+						</li>
+						<li>Multipart components are identified and utilized</li>
+						<li>race conditions checked</li>
+						<li>Diagnostic resources by design (leds, serial ports, etc.) even if unpopulated by default</li>
+					</ol>
+				</li>
+				<li id="SCH_ELECTRICAL">Electrical Components
+					<ol>
+						<li>Check Absolute Maximum Ratings of <i>every</i> component, even if there's no reason to believe the ratings have been violated. Also look at specified (dm, cm) input levels.</li>
+						<li>check the data sheet fine print and apnotes for weird IC behaviors</li>
+						<li><span title="as was not done in the on-board computer of the 1990 Geo Tracker, apparently manufactured by Mitsubishi, where capacitor C4 was rated at 47uf/50V across an automotive rail which can easily see larger spikes.">Voltage ratings of all components checked (including derating and spike values)?</span></li>
+						<li>automotive powered devices must withstand 60 to 100 volt surges</li>
+						<li>Each IC has a predictable or controlled power-up state</li>
+						<li>Polarized components checked for polarity</li>
+						<li>Polarized components protected/ensured against from reverse voltage</li>
+						<li>Pull-ups on all open-collector outputs (IC and discrete)</li>
+						<li>check maximum power dissipation at worst-case operating temperatures</li>
+						<li>ensure resistors/capacitors are operating within their specified (voltage, current), power range plus safety factor</li>
+						<li>resistor power ratings derated for elevated ambient temperatures</li>
+						<li>Avoid low-impedance sources driving tantalum capacitors, leading to premature failure
+							<div class="note">Switch-on current should also be limited. References:
+								<ul class="note">
+									<li><a href="http://www.avx.com/docs/techinfo/FieldCrystallization.pdf">A Study of Field Crystallization in Tantalum Capacitors and its effect on DCL and Reliability - AVX</a></li>
+									<li><a href="http://www.avx.com/docs/techinfo/Tantalum-NiobiumCapacitors/voltaged.pdf">Voltage Derating Rules for Solid Tantalum and Niobium Capacitors - AVX</a></li>
+									<li><a href="https://www.edn.com/electronics-blogs/tales-from-the-cube/4363362/What-a-cap-astrophe-">What a cap-astrophe! - Jim Keith, EDN</a></li>
+									<li><a href="http://www.vishay.com/docs/49268/tn0003.pdf">DC LEAKAGE FAILURE MODE - Vishay</a></li>
+								</ul>
+							</div>
+						</li>
+						<li>electrolytic/tantalum capacitor temperature/voltage derating sufficient for MTBF</li>
+						<li id="SCH_PITFALLS">Pitfalls &amp; gotchas
+							<ol>
+								<li>piezo elements generate voltages (when shocked) that can destroy their drivers &#8212; check for susceptibility</li>
+							</ol>
+						</li>
+						<li>Schematic tool quirks
+							<ol>
+								<li>Check hidden power and ground connections (tool/usage dependent)</li>
+								<li>wires exist between all connected pins/ports (no direct pin/pin connections) if capture package does not like such connections</li>
+								<li>ensure schematic software did / did not separate Vcc from Vdd, Vss from GND as needed</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_CONNECTORS">Connectors
+					<ol>
+						<li>Mating connectors on different boards match in pin-out (consider whether 1:1, 1:2, 1:(N-1), 1:N cable wiring is used and document it)</li>
+						<li>Determine effect of losing each of multiple grounds on a connector</li>
+						<li>Ground made first and breaks last for hot pluggability</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_TRANSISTORCIRCUITS">Transistor circuits
+					<ol>
+						<li>avoid reverse base-emitter current/voltage on bipolar transistors (even short term, permanently damages transistor beta)</li>
+						<li>check for voltage transients and high voltages on FET gates</li>
+						<li>Check drain-source orientation of FETs, check channel type (ambiguous symbol variants for IC and discrete transistors!), consider body diode</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_POWERSUPPLY">Power supply
+					<ol>
+						<li>sufficient power rails for analog circuits</li>
+						<li>check for input voltages applied with power off and CMOS latchup possibilities</li>
+						<li>sufficient capacitance on low dropout voltage regulators</li>
+						<li>estimate total worst case power supply current</li>
+						<li>Is there sufficient bulk capacitance?</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_OpAmpAnalog">OpAmps &amp; Analog circuit checks
+					<ol>
+						<li>check time delays and slew rates of opamps used as comparators</li>
+						<li>check opamp input over-drive response for unintended output inversion</li>
+						<li>check common mode input voltages on opamps and common mode limits for selected supply voltage</li>
+						<li>connect unused opamps as voltage followers (inverting input to output) with grounded noninverting input and open output to prevent excessive power consumption and uncontrolled oscillations</li>
+						<li>Unused comparators: All pins to common.</li>
+						<li>Consider providing additional (unpopulated) components to generalize the opamp circuit later (e.g. convert a voltage follower, to a non-inverting amp)</li>
+						<li>Check input bias currents of opamps and provide compensation resistors where necessary. (But only there, as they might hurt other performance aspects)</li>
+						<li>LM324 and LM358 outputs loaded to prevent crossover distortion</li>
+						<li>amplifiers checked for stability</li>
+						<li>oscillators checked for reliable startup</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_Digital">Digital circuits
+					<ol>
+						<li>Darlington outputs (1.2v low) driving logic inputs</li>
+						<li>Reset pins pulled to high/low</li>
+						<li>Reset is filtered</li>
+						<li>reset circuit design reliable, both glitch-free and consistent; tested with slow power supply fall time</li>
+						<li>setup, hold, access times for data and address busses checked (including trace delays)</li>
+						<li>for buses, ensure bus order matches device order</li>
+						<li>under-utilization of gates on multi-gate parts checked</li>
+						<li>symbols identify open collector/drain pins and internal pulled up/down pins</li>
+						<li>clock lines with series termination and parallel termination component locations present even if not populated; zero ohm resistor for series, unpopulated parts for parallel termination. Select parallel termination voltage rail according to signaling standard (high/low/mid).</li>
+						<li>avoid direct connect of mode pins or no-connect bus lines to GND or VCC so PCB rework options are maximal</li>
+						
+						<li>connect DIP switches and other grouped I/O to ports in a logical way, LS bit to LS bit, MS bit to MS bit</li>
+						
+						<li id="SCH_BUSSES">Busses
+							<ol>
+								<li>I2C
+									<ol>
+										<li>Pull-up on <abbr title="Serial data line">SDA</abbr> an <abbr title="Serial clock line">SCL</abbr>
+											<span class="note">I2C is open-drain and thus needs pull-up. References: <a href="https://www.ti.com/lit/an/slva689/slva689.pdf">Texas Instruments, Application Report, I2C Bus Pullup Resistor Calculation</a></span>
+										</li>
+									</ol>
+								</li>
+								<li><abbr title="Joint Test Action Group">JTAG</abbr>
+									<ol>
+										<li>Have datasheets been consulted for necessary pull-up/-down?
+											<span class="note">Typically <abbr title="Test mode select">TMS</abbr> and <abbr title="Test data input">TDI</abbr> are pull-up and <abbr title="Test clock">TCK</abbr> is pull-down, but it changes between manufacturers and devices. Some devices have internal pull-up/-down, yet external resistors are recommended to keep start-up well-defined.</span>
+										</li>
+									</ol>
+								</li>
+								<li><abbr title="Serial wire debug">SWD</abbr>
+									<ol>
+										<li>Have datasheets been consulted for necessary pull-up/-down?
+											<span class="note">Typically <abbr title="Test mode select">TMS</abbr> and <abbr title="Test data input">TDI</abbr> are pull-up and <abbr title="Test clock">TCK</abbr> is pull-down, but it changes between manufacturers and devices. Some devices have internal pull-up/-down, yet external resistors are recommended to keep start-up well-defined.</span>
+										</li>
+									</ol>
+								</li>
+							</ol>
+						</li>
+						
+						<li id="SCH_HS">High-Speed circuits
+							<ol>
+								<li>Matched length connections documented and specified; if possible by schematic capture package, DRC rules have been added.</li>
+								<li>Differential pair connections documented and specified; if possible by schematic capture package, DRC rules have been added.</li>
+							</ol>
+						</li>
+						
+					</ol>
+				</li>
+	
+				<li id="SCH_RF">RF circuits
+					<ol>
+						<li>RF circuits, components and connections documented and specified; if possible by schematic capture package, DRC rules have been added.</li>
+					</ol>
+				</li>
+				
+				
+				<li id="SCH_uC">Microcontroller Schematic Checklist
+					<ol>
+						<li>UART/RS-232 RX and TX swap between devices (notations may indicate not what you think: check datasheet)</li>
+						<li>ability to disable watchdog timer for testing and diagnostics and emulation</li>
+						<li>use of baud rate friendly clock source for devices that have serial ports</li>
+						<li>~IOR and ~IOW strobes on UARTs are typically incompatible with timings of signals readily available on many processors</li>
+						<li>replacement part compatibility with software requirements: &#8220;top-boot vs. bottom boot FLASH&#8221;, UART compatibility, SPI memory timing and addressing for different sized parts</li>
+						<li>all PCB signal changes noted to the software engineers</li>
+						
+					</ol>
+				</li>
+				
+				<li id="SCH_FPGA">CPLD / FPGA Schematic Checklist
+					<ol>
+						<li>UART/RS-232 RX and TX swap between devices (notations may indicate not what you think: check datasheet)</li>
+						
+					</ol>
+				</li>
+				
+				<li id="SCH_EMC">EMC / EMI
+					<ol>
+						<li>all unused inputs terminated</li>
+						<li>unused OpAmps are configured as unity gain followers (if unity gain stable) with grounded input. Shorting both inputs to GND may lead to excessive power consumption.</li>
+						<li>all outside world I/O lines filtered for RFI</li>
+						<li>all outside world I/O lines protected against <abbr title="Electro static discharge">ESD</abbr></li>
+						<li>bypass cap for each IC, close to power pins and low-impedance to GND</li>
+						<li>consider signal rate-of-rise and fall for noise radiation</li>
+						<li>separate analog signals from noisy or digital signals</li>
+						<li>high frequency crystal cases should be flush to the PCB and grounded</li>
+					</ol>
+				</li>
+				
+				
+				<li id="SCH_SI">Signal integrity (Schematic)
+					<ol>
+						<li>Is there sufficient decoupling?</li>
+						<li>Is there filtering between analog and digital commons?</li>
+						<li>Are optocouplers filtered?</li>
+						<li>Impedance on inputs from outside of board?</li>
+						<li>Are ferrite beads on input/output power lines?</li>
+						<li>Are ferrite beads on sensitive signal lines? 
+							<span class="note">
+							This includes signal lines that are not sensitive themselves, but connect to sensitive components.
+							E.g. U-Blox recommend ferrite beads on <abbr title="Global Positioning System">GPS</abbr> module <abbr title="Universal asynchronous receiver-transmitter">UART</abbr> connections to avoid <abbr title="Radio frequency">RF</abbr> noise travelling "along" and into the module, see <a href="https://www.u-blox.com/sites/default/files/NEO-M8_HardwareIntegrationManual_%28UBX-13003557%29.pdf"> U-Blox M8 Hardware Integration Manual </a>
+							</span> 
+						</li>
+						<li> Do all ferrite beads have sufficient margin in <abbr title="Direct current">DC</abbr> current rating? 
+							<span class="note">
+							When the <abbr title="Direct current">DC</abbr> current (<abbr title="Direct current">DC</abbr> bias current) approaches the maximum, the effective impedance of ferrite beads decreases significantly. See <a href="https://www.analog.com/media/en/technical-documentation/application-notes/an-1368.pdf"> Analog Devices AN-1368, Choosing and Using Ferrite Beads </a>
+							</span>
+						</li>
+						<li>Is there an estimate of what frequencies the ferrite beads are required to filter? </li>
+						<li>Do high-speed single-ended digital signals have series resistors? </li>
+						<li>All high-speed signals have termination resistors/networks if not provided internally by receiving component (terminations may be unpopulated initially)</li>
+						<li>Is there a footprint for a common mode filter on high-speed differential signals going offboard?
+							<span class="note">
+							For high-speed differential buses like <abbr title="Universal Serial Bus">USB</abbr> 3.0, DisplayPort, and <abbr title="High-Definition Multimedia Interface">HDMI</abbr>, a common-mode filter will stop common-mode noise generated in the transceiver from traveling into the signal line where it may radiate from the cable. Notice that the filter might degrade the differential signal slightly.
+							<br> Using a footprint allows one to be quickly fitted in case <abbr title="Electromagnetic compatibility">EMC</abbr> testing fails.
+							</span> 
+						</li>
+						<li> Do op-amps have input filters for <abbr title="Electromagnetic interference">EMI</abbr>?
+							<span class="note"> High frequency <abbr title="Electromagnetic interference">EMI</abbr> signals can be rectified by the op-amp if not filtered out beforehand, resulting in <abbr title="Direct current">DC</abbr> errors at the output. See <a href="https://www.analog.com/media/en/training-seminars/tutorials/MT-096.pdf"> Analog Devices MT-096, RFI Rectification Concepts </a> and <a href="https://cherryclough.com/media/file/Miscellaneous/Analogue%20circuit%20design%20for%20RF%20immunity,%20EMCJ,%20Issue%2084,%20Sept%202009.pdf"> Analogue circuit design for RF immunity, Clough Consoltants </a> 
+							</span>
+						</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_TESTING">Testing
+					<ol>
+						<li>Are there ground connection points? (for probes etc.)</li>
+						<li>Have necessary test points been added?</li>
+						<li>Have configurable strap-in pins been biased?</li>
+						<li>Have configurable strap-in pins been connected with jumpers or similar?</li>
+					</ol>
+				</li>
+				
+				<li id="SCH_DOCU">Documentation and notes
+					<ol>
+						<li>all components have reference designators and values</li>
+						<li>Unpopulated parts are clearly marked</li>
+						<li>Are destinations noted if they go to other sheets</li>
+						<li>off board connectors identify all signals even if not used on this design</li>
+						<li>card edge connectors identify mating part</li>
+						<li>Are connections marked with expected current draw?</li>
+						<li>Have special <abbr title="Printed circuit board">PCB</abbr> or layout requirements been noted? #schematic #pcb
+							<ol>
+								<li>Impedance?</li>
+								<li>Ground planes?</li>
+								<li>Routing?</li>
+								<li>Keep-out?</li>
+								<li>References to recommendations in datasheet</li>
+							</ol>
+						</li>
+						<li>Notes explaining purpose, functionality, origin, references and caculations for circuits</li>
+						<li>pin names and attributes on symbols with multi-function pins should match actual design usage (I/O/Bi, Name)</li>
+	
+						<li id="RefDes">preferred component reference designators used
+							<ol>
+								<li><span class="inline-fld">R</span> fixed resistor</li>
+								<li><span class="inline-fld">RN</span> resistor network</li>
+								<li><span class="inline-fld">RV</span> variable resistor</li>
+								<li><span class="inline-fld">C</span> capacitor (network, fixed or variable)</li>
+								<li><span class="inline-fld">L</span> inductor</li>
+								<li><span class="inline-fld">Q</span> transistor, FET, SCR, TRIAC</li>
+								<li><span class="inline-fld">D,CR</span> diode, rectifier, Zener, varicap, LED</li>
+								<li><span class="inline-fld">DL</span> multisegment display (any type)</li>
+								<li><span class="inline-fld">VR,Q,IC</span> voltage regulator</li>
+								<li><span class="inline-fld">U,IC</span> integrated circuit</li>
+								<li><span class="inline-fld">J</span> socket, jack (female / receptacle / stationary portion)</li>
+								<li><span class="inline-fld">P</span> plug (male, disconnecting device / movable portion)</li>
+								<li><span class="inline-fld">JP</span> jumper (pins, trace, or wire)</li>
+								<li><span class="inline-fld">Y,X</span> crystal</li>
+								<li><span class="inline-fld">M</span> modular subassembly, daughter board</li>
+								<li><span class="inline-fld">S</span> mechanical switch</li>
+								<li><span class="inline-fld">F</span> fuse</li>
+								<li><span class="inline-fld">FL</span> filter</li>
+								<li><span class="inline-fld">T</span> transformer</li>
+								<li><span class="inline-fld">KB</span> keyboard</li>
+								<li><span class="inline-fld">B,BT</span> battery</li>
+								<li><span class="inline-fld">K</span> Relay, magnetically operated switch</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				<li id="SCH_DRAFTING">Drafting
+					<ol>
+						<li>No overlap between text, notes references, wires, symbols etc. <span class="note">Reference: <a href="https://youtu.be/R_Ud-FxUw0g?t=475">EEVblog #1129 - Creating a Nice Readable Schematic (7:55)</a></span></li>
+						<li>Is all text horizontal? <span class="note">Within reason and if there is space for it, otherwise vertical, readable from the right side.</span></li>
+						<li>Do all components have reference and value?
+							<ol>
+								<li>Are values in a uniform format</li>
+								<li>Are references using standard designators?</li>
+								<li>Are references placed unambiguously?</li>
+								<li>Decimal points avoided? <span class="note">Decimal points might get lost during photocopying. Reference: <a href="https://youtu.be/R_Ud-FxUw0g?t=2640">EEVblog #1129 - Creating a Nice Readable Schematic (44:00)</a></span></li>
+							</ol>
+						</li>
+						<li>All junctions dotted</li>
+						<li>All no-connect pins should be labeled NC (or clearly marked/indicated by other tool mechanism)</li>
+						<li>No 4-way connections</li>
+						<li>No upwards pointing ground symbols?</li>
+						<li>Are component references ordered by schematic layout?</li>
+						<li>Are the appropriate power nets connected? (Vcc, Vss, Vdd)</li>
+						<li>Net names on top of lines</li>
+						<li>Are unused nets left unlabeled? <span class="note">If a net is labeled, it is expected to be used. It is usually clearer to leave it unlabeled.</span></li>
+						<li>All connections/markings have a purpose <span class="note">Connections going from and to nowhere lead to confusion. </span></li>
+						
+					</ol>
+				</li>
+				<li id="SCH_SHEETS">Sheets
+					<ol>
+						<li>Cover page with general info and table of contents for large schematics</li>
+						<li>Sheets are consistently sized</li>
+						<li>Readable when printed</li>
+						<li>Logical layout should go left-right, top-bottom. </li>
+						<li>Title block present and consistent on all pages
+							<ol>
+								<li>Name of author</li>
+								<li>Name of reviewer</li>
+								<li>List of revisions and changes</li>
+								<li>Date</li>
+								<li>Revision</li>
+								<li>Company / organization</li>
+								<li>Sheet/drawing number</li>
+								<li>File name </li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+				<li id="ERC">ERC
+					<ol>
+						<li><abbr title="Electric rule check">ERC</abbr> and all warnings handled or waived?</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+		
+	
+		
+		<li class="PCB" id="PCB"><h2>Printed circuit board</h2>
+			<ol>
+				<li id="PCB_TECH">Technology &amp; Planning
+					<ol>
+						<li>Are gold fingers needed?</li>
+						<li>How is the <abbr title="Printed circuit board">PCB</abbr> panelized?</li>
+						<li>What stack-up is needed?</li>
+						<li>Which finish is necessary?</li>
+						<li>What thickness of finish?</li>
+						<li>Ability for blind or buried vias?</li>
+						<li>How is assembly performed?</li>
+						<li>Board size optimized for panelization (if possible)?</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_FLP"><h2>Floorplan</h2>
+					<ol>
+						<li>Are mechanical constraints defined?
+							<ol>
+								<li>Mounting</li>
+								<li>Board size/shape</li>
+								<li>Connector placement</li>
+								<li>Human interface placement</li>
+							</ol>
+						</li>
+						<li>Can components be oriented in roughly the same way / consistently in layout?</li>
+						<li><h3>Are components easily accessible?</h3>
+							<span class="note">Large components or high density boards might make it difficult to inspect components during testing or after failure. Apart from visual blocking it can also manifest as physically blocking from accessing with probes.</span>
+							<ol>
+								<li>For inspection?</li>
+								<li>For replacement?</li>
+							</ol>
+						</li>
+						<li>Are interactive components placed in a logical manner? (Consistent orientation of buttons? Consistent rotation of potentiometers?)</li>
+						<li>Are temperature sensitive components placed away from hot components?</li>
+						<li>Are EMI sensitive components placed away from noisy parts of the design?</li>
+						<li>Ground loops made through connections avoided/bypassed</li>
+						<li>Should there be a ground ring?
+							<span class="note"><em>Ground rings</em> serve both a signal integrity and a practical purpose. For <abbr title="Electromagnetic compatibility">EMC</abbr> it is necessary to avoid traces along edges of the <abbr title="Printed circuit board">PCB</abbr>. Adding a ground ring is an easy way of ensuring this constraint is held. It also provides somewhat better <abbr title="Electromagnetic interference">EMI</abbr> prevention. Source: <a href="https://electronics.stackexchange.com/a/36845/2795">Why are vias placed this way on a PCB? - Stack Exchange</a></span></li>
+					</ol>
+				</li>
+				
+				<li id="PCB_FP">Footprints / Land patterns
+					<ol>
+						<li>Is pin 1 marked in a consistent manner?</li>
+						<li>Is component polarity marked in a consistent manner?
+							<ol>
+								<li>For electrically polarized components like capacitors?</li>
+								<li>For keyed components like connectors?</li>
+							</ol>
+						</li>
+						<li>Are high-density chips marked with pin numbers?</li>
+						<li>Are there tick-marks for every 5/10 pin on high pin count?</li>
+						<li>Are there square pins on components? Are the holes big enough?</li>
+						<li>Have the footprint dimensions been cross-checked with recommended footprint for the specific component?</li>
+						<li>Are the footprints from the datasheet defined as top view or bottom view?</li>
+						<li>Are edge-connectors/fingers interleaved/zig-zag? <span class="note">Edge pins on <abbr title="Small outline dual in-line memory module">SODIMM</abbr> are interleaved in placement when comparing the two sides of the inserted board. References:
+							<ul class="note">
+								<li><a href="https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Customer+Drawing%7F390112%7FR1%7Fpdf%7FEnglish%7FENG_CD_390112_R1.pdf%7F390112-1">TE connectivity: 390112-1 datasheet</a></li>
+								<li><a href="https://en.wikipedia.org/wiki/Zig-zag_in-line_package">Wikipedia: Zig-zag in-line package</a></li>
+							</ul>
+						</span></li>
+						<li>Are there the necessary thermal pads?
+							<ol>
+								<li>Are they exposed?</li>
+								<li>Are they connected to the right net? <span class="note">The net is not necessarily ground.</span></li>
+							</ol>
+						</li>
+						<li>Are certain pins only accessible on the thermal pad/unexposed pads and is the assembly procedure for this noted? <span class="note">Sometimes the only ground connection is the thermal pad. This requires soldering the thermal pad and it is thus a assembly requirement to ensure it is soldered.</span></li>
+					</ol>
+				</li>
+				
+				<li id="PCB_PLACEMENT">Placement
+					<ol>
+						<li>Are jumpers accessible?</li>
+						<li>Are debug connectors accessible?</li>
+						<li>Filter resistors closer to the source?</li>
+						<li>Termination resistors closer to the target?</li>
+						<li>Minimum component body spacing</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_MECH">Mechanical
+					<ol>
+						<li>Double check mounting positions will be OK in the equipment the PCB is fitted in.</li>
+						<li>Is there spacing for an assembly run marking?</li>
+						<li>Is there clearance for connectors?</li>
+						<li>Are there mounting holes?</li>
+						<li>Should mounting holes be electrically isolated?</li>
+						<li>Should mounting holes have islands?</li>
+						<li>Should grounded mounting holes have via stitching?
+							<span class="note">Vias around mounting holes improve ground connection and provides some redundancy. Source: <a href="https://electronics.stackexchange.com/a/36845/2795">Why are vias placed this way on a <abbr title="Printed circuit board">PCB</abbr>? - Stack Exchange</a></span>
+						</li>
+						<li>Are hole diameters compensating for plating?</li>
+						<li>Check for clearance problems with screws and mounting hardware.</li>
+						<li>Mounting holes matched 1:1 with mating parts</li>
+						<li>Is the outline of the board defined?</li>
+						<li>Is the mechanical enclosure defined?</li>
+						<li>Is there enough space for the mating connectors? #clearance #connectors</li>
+						<li>Is there enough vertical space for components?</li>
+						
+						<li>Are internal corners rounded? Can they be milled?</li>
+					</ol>
+				</li>
+				<li id="PCB_ELECTRICAL">Electrical
+					<ol>
+						<li>What stack-up is needed?</li>
+						<li>Polarized components are oriented correctly</li>
+						<li>All traces are routed?</li>
+						<li>Are decoupling capacitors placed close to power pins of <abbr title="Integrated circuit">ICs</abbr>?</li>
+						<li>Are analog and digital commons joined at only one point?</li>
+						<li>Does <abbr title="Electric rule check">ERC</abbr> pass?</li>
+						<li>Are isolation barriers large enough? #mechanical #power #safety</li>
+						<li>Are the appropriate power nets connected? (Vcc, Vss, Vdd)</li>
+					</ol>
+				</li>
+				<li id="PCB_SI">Signal integrity (PCB)
+					<ol>
+						<li>Digital signals routed over separate (digital) ground planes or within separate board region</li>
+						<li>Digital and analog signal commons joined at only one point (or use of a continuous, unbroken ground plane with careful component placement)</li>
+						<li>DGND of ADCs with low digital current draw connected to analog GND plane (<a href="https://www.analog.com/en/analog-dialogue/articles/grounding-again.html">Analog Devices: Ask the Applications Engineer &ndash; 12: Grounding (Again)</a>, <a href="https://www.analog.com/media/en/training-seminars/tutorials/MT-031.pdf">Analog Devices MT-031</a>)</li>
+						<li>High-speed signals avoid gaps in ground planes</li>
+						<li>Stubs minimized for high-speed signals?</li>
+						<li>Are there nets that need their length matched/equalised (e.g. fast differential connections such as Ethernet or parallel busses such as DDR lanes)?</li>
+						<li>Decide whether tightly coupled differencial pairs should be used (based on stackup, manufacturing tolerances, etc.) 
+							<ul class="note">
+								<li>Tightly coupled diffpairs require very little skew between segments, symmetric and carefully placed vias with GND returns, extra care at component/connector pins due to possibly unavoidable impedance change.</li>
+								<li>Loosely coupled diffpairs require matched flight time for each half of the pair and consistent impedance and progagation delay across the board area. Each half can be designed at (e.g. 50 Ohm) transmission line, maintaining impedance when routing to connectors.</li>
+							</ul>
+						</li>
+						<li>Differential pair spacing based upon impedance calculations with no other vias or signals in between</li>
+						<li>Transmission lines terminated with an appropriate impedance</li>
+						<li>Crystal connections are as short as possible</li>
+						<li>Is there a guard ring around the crystal?</li>
+						<li>Filters on A/D pins</li>
+						<li>High speed signals avoid changing reference planes whereever possible. Changing sides of the same reference plane might be a better alternative.</li>
+						<li>Ground return vias for every layer change of high speed signals</li>
+						<li>Place I/O drivers and receivers near where their signals leave/enter the board (e.g. at connectors)</li>
+						<li>Verify that all series terminators are located near the source</li>
+						<li>Verify that parallel terminators are located near, or even better after the last device on the transmission line (fly by for all devices including last one, ending in termination)</li>
+						<li><abbr title="Electromagnetic interference">EMI</abbr> / <abbr title="Radio-frequency interference">RFI</abbr> filters close to entry / exit of shielded areas?</li>
+						<li>Are traces avoided under sensitive components?</li>
+						<li>Are traces avoided under noisy components?</li>
+						<li>Are vias avoided under metal-film resistors?</li>
+						<li class="t-RF">Is via fencing of sensitive <abbr title="Radio frequency">RF</abbr> transission lines done with the proper via spacing? (< 1/20 lambda)</li>
+						<li class="t-RF">Is there an option for a shielding can over sensitive circuitry e.g. <abbr title="Radio frequency">RF</abbr>? </li>
+						<li>Are bypass capacitors close to power pins?</li>
+						<li>Is low inductance mounting used for decoupling?</li>
+						<li>Ideally high speed connectors should have the ground plane getting through between pins to avoid signal return paths having to go round the connector to a ground pin on it. GND vias to planes can also help in this regard.</li>
+					</ol>
+				</li>
+				
+				
+				<li id="PCB_EMC_EMI">EMC / EMI">
+					<ol>
+						<li>all outside world I/O lines filtered for RFI, observing proper layout</li>
+						<li>all outside world I/O lines protected against static discharge</li>
+					</ol>
+				</li>
+				<li id="RFPCB">RF circuits
+					<ol>
+						<li>Proper RF layout observed and consulted with RF engineer.</li>
+					</ol>
+				</li>
+				<li id="PCB_PLANES">Copper pour (Planes / Polygons)
+					<ol>
+						<li>ground planes where possible</li>
+						
+						<li>Ground / power pins connected and checked</li>
+						<li>Keep ground planes away under/from high speed OpAmp negative input and feedback, especially when advised to do so by datasheet (may affect stability)</li>
+						<li>No pour between adjacent pins on <abbr title="Integrated circuit">ICs</abbr>?
+							<span class="note">These can be mistaken for shorts during inspection. A keep-out zone between pins can fix this without adjusting the pour clearances.</span></li>
+						<li>Planes checked on all layers</li>
+						<li>Thermal reliefs at appropriate places (e.g. manually soldered components), also for internal power layers</li>
+						<li>Do planes introduce ground loops?</li>
+					</ol>
+				</li>
+				<li id="PCB_ROUTING">Traces &amp; Routing
+					<ol>
+						<li>Are trace-pad connections sufficiently obtuse (angle 90 deg or more)?</li>
+						<li>Tace width/plating and via diameter/plating sufficient for the current carried and max heating</li>
+						<li>Maximize distances between features where possible</li>
+						<li>No connections between adjacent pins on <abbr title="Integrated circuit">ICs</abbr>?
+							<span class="note">These can be mistaken for shorts during inspection.</span></li>
+						<li>Are vias for internal power traces big enough?</li>
+						<li>Provide multiple vias for high current and/or low impedance traces</li>
+						<li>No vias under metal-film resistors and similar poorly insulated parts</li>
+					
+						<li>Is there enough space for heatsinks? #mechanical #thermal</li>
+						<li class="t-RF">Has mitered bends or soft curves (r > 3 &middot; trace width) been implemented for impedance sensitive traces?</li>
+					</ol>
+				</li>
+				<li id="PCB_THERMAL">Thermal
+					<ol>
+						<li>Temperature sensitive components (e.g. electolytic caps) placed below / away from hot components</li>
+						<li>Thermal vias present in thermal pads (no thermal reliefs!)</li>
+						<li>standoffs on power resistors or other hot components</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_PITFALLS">(Common) PCB Pitfalls
+					<ol>
+						<li>all polarized components checked (capacitors, diodes, transistors, etc.)</li>
+						<li>USB data lines D+ and D- have 39R series resistors, I2C have pull-up resistors (where not on-chip), Rx and Tx lines are not swapped.</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_PROTO">Prototypes
+					<ol>
+						<li>In prototype PCBs without hole plating, traces connect to THT pads from the correct side/layer</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_TEST">Testability &amp; Testing
+					<ol>
+						<li>Testpoints
+							<ol>
+								<li>Are there test points for nets which are difficult to probe due to layout?</li>
+								<li>PCB has ground turrets</li>
+								<li>PCB has labeled power rail test points</li>
+								<li>Test points present for critical circuits, hard to reach (and inner layer) nets, nets with blind or burried or microvias, important signals, important buses and connections to tight SMD chips</li>
+								<li>test pads for in-circuit or bed-of-nails functional testing</li>
+								<li>test pad or test via on every net to allow in circuit test</li>
+								<li>Test pads are (if possible) on only one side of the PCB</li>
+								<li>Test point on (selected) unused outputs for debug use</li>
+								<li>Ground connection points close to analog, rf or high-speed test points</li>
+								<li>Carefully considered the effects of testpoint-stubs on high-speed and rf nets</li>
+							</ol>
+						</li>
+						<li>No logic pins connected directly to power or ground if in-circuit test is planned</li>
+						<li>In circuit programming connectors are placed near the programmed device</li>
+						<li>automated netlist check</li>
+						<li>manual netlist check (at least on some critical examples)</li>
+						<li>check netlist for nodes with only one connection</li>
+					</ol>
+				</li>
+				
+				<li id="REPAIR">Maintenance &amp; Repair
+					<ol>
+						<li>Are there any very big through hole components such as electrolyte capacitors?  If so consider not to connect to internal layers on multilayer designs in case they get knocked and the internal connection is damaged. Do use inner layer connections if signal/power integrity demands low impedance.</li>
+						<li>Layout PCB so that any rework or repair of a component does not require removal of other components</li>
+					</ol>
+				</li>
+				<li id="SILKSCR">Silk screen
+					<ol>
+						<li>Notes and documentation
+							<ol>
+								<li>Is there a revision number?</li>
+								<li>Is there a date?</li>
+								<li>Is there blank space for a serial/assembly number? <span class="note">Remember to consider how large it should be. Reference: <a href="https://electronics.stackexchange.com/questions/422510/writable-area-on-a-pcb">Writable area on a PCB - Stack Exchange</a></span></li>
+								<li>Are connector pin-outs labeled?</li>
+								<li>Fuse size and type marked on <abbr title="Printed circuit board">PCB</abbr></li>
+								<li>Are functional groups marked?</li>
+								<li>Are high-density chips marked with pin numbers?</li>
+								<li>Is functionality labeled?
+									<ol>
+										<li>Test points</li>
+										<li><abbr title="Light-emitting diode">LEDs</abbr></li>
+										<li>Buttons</li>
+										<li>Connectors/terminals</li>
+										<li>Mounting holes</li>
+										<li>Jumpers</li>
+									</ol>
+								</li>
+							</ol>
+						</li>
+						<li>Drafting
+							<ol>
+								<li>No silk screen on pads</li>
+								<li>All text is readable from at most two directions</li>
+								<li>Will the silk screen be legible?</li>
+								<li>Are component references order by <abbr title="Printed circuit board">PCB</abbr> layout?</li>
+								<li>Is there a coordinate system?</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+	
+				<li id="PCB_HEADER">Header/block
+					<ol>
+						<li>Name of author</li>
+						<li>Name of reviewer</li>
+						<li>List of revisions and changes</li>
+						<li>Date</li>
+						<li>Revision</li>
+						<li>Company / organization</li>
+						<li>Sheet/drawing number</li>
+					</ol>
+				</li>
+				
+				<li id="CLEARANCES">Clearance
+					<ol>
+						<li>All keep-out areas honored</li>
+						<li>Keepout around mounting holes</li>
+						<li>Clearance for <abbr title="Integrated circuit">IC</abbr> extraction tools</li>
+						<li>Clearance for IC extraction tools</li>
+						<li>Clearance for programmer/emulator adapter or pod</li>
+						<li>Clearance for assembly tools (wrenches, screwdrivers etc.)</li>
+						<li>Clearance for probes</li>
+						<li>Trace-to-trace clearance based upon voltage rating?</li>
+						<li>All ICs have pin one clearly marked, visible even when chip is installed</li>
+					</ol>
+				</li>
+				
+	
+						
+				<li id="PANELIZATION">Panelization
+					<ol>
+						<li>Panelized <abbr title="Printed circuit board">PCB</abbr> fits test rig</li>
+						<li>Panel design/layout checked with assembly house (panelized PCB fits test and manufacturing equipment)</li>
+					</ol>
+				</li>
+				
+				<li id="ASSEMBLY">Assembly
+					<ol>
+						<li>Is there enough space for the minimum bending radius of the wire harness?</li>
+						<li>Fiducials (visual references) for automated assembly</li>
+						<li>Tooling holes for automated assembly</li>
+						<li>components keep proper distance PCB edge</li>
+						<li>all polarized components point same way (if possible considering other constraints, e.g. EMC)</li>
+						<li>Check whether assembly will be performed on pannelized PCBs (if so, check panel layout with assembly company) or separated PCBs (then check if assembly company needs a fixture)</li>
+						<li>Is there a recommended/necessary order for mounting components on the board?</li>
+						<li>Will mounting certain components make it impossible to mount others?</li>
+						<li>Is there an assembly order for subsystems?</li>
+						<li>Is there a testing order for subsystems?</li>
+						<li>All legend text reads in one or two directions</li>
+						<li>Provide ground test points, accessible and sized for scope ground clip</li>
+						<li>Potentiometers should increase controlled quantity clockwise</li>
+						<li>Check for traces/pads which may be susceptible to solder bridging (exposed copper)</li>
+					</ol>
+				</li>
+				
+				<li id="PCB_DFM"><abbr title="Design for Manufaturability">DFM</abbr>
+					<ol>
+						<li>Are solder paste openings the proper size?</li>
+						<li><a href="#goto_CLEARANCES">Clearances</a> respected/checked</li>
+						<li><a href="#goto_ASSEMBLY">Assembly</a> constraints/considerations respected/checked</li>
+						<li>Are manufacturing tolerances honored?
+							<ol>
+								<li>Solder mask</li>
+								<li>Silk screen</li>
+								<li>Traces</li>
+								<li>Holes</li>
+							</ol>
+						</li>
+						<li>Common tolerance values and design rules followed, if no more specific info is available:
+							<ol>
+								<li>finished hole sizes are &ge;10&nbsp;mils (0.254&nbsp;mm) larger than lead</li>
+								<li>pads &ge;15&nbsp;mils (0.381&nbsp;mm) larger than finished hole sizes</li>
+								<li>no silkscreen legend text over vias (if vias not soldermasked) or holes</li>
+								<li>all silkscreen text located to be readable when the board is populated</li>
+								<li>soldermask does or does not cover vias (ask manufacturer <i>and</i> assembly house if vias are tented)</li>
+								<li>no acute inside angles in foil</li>
+								<li>components &ge;200 mils (5.08 mm) from edge of PCB</li>
+								<li>traces &ge; 20 mils (0.508mm) from edge of PCB</li>
+								<li>silkscreen legend text weight &ge;10&nbsp;mils (0.254&nbsp;mm)</li>
+							</ol>
+						</li>
+					</ol>
+				</li>
+						
+				<li id="MANUFACTDOCS">Manufacturing documents &amp; documentation
+					<ol>
+						<li>Are all manufacturing requirements noted on the layout file (or in additional document)?
+							<ol>
+								<li id="STACKUP">PCB stackup noted: 
+									<ol>
+										<li>layer count, </li>
+										<li>holes and via types and spans, </li>
+										<li>for dielectrics: material type, weave, thickness, prepreg or core,</li>
+										<li>for copper: material, copper weight/thickness, surface roughness</li>
+										<li>soldermask, surface finish, </li>
+										<li>etc.</li>
+									</ol>
+								</li>
+								<li>Layers/Traces with controlled impedance specified (if applicable). This is normally related to the stack-up and should be discussed during stackup negotiation.</li>
+								<li>Hole diameter on drawing are finished sizes, after plating.</li>
+								<li>Thru hole drill tolerance noted</li>
+								<li>Plugged (and plated over) vias are documented.</li>
+								<li>Blind vias / Microvias are documented.</li>
+								<li>drill legend shows all symbols and sizes</li>
+								<li>soldermask over bare copper noted if needed</li>
+								<li>Who determines soldermask expansion (customer or sometimes manufacturer), </li>
+								<li>Is copper balancing allowed by the manufacturer (on which layers/in which regions),</li>
+								<li>How many individual boards are on a PCB (if it has been panelized), </li>
+								<li>How boards are going to be cut (e.g. v-scoring or routing, if panelized), </li>
+							</ol>
+						</li>
+						
+						<li id="BOM">Parts Lists (BOM)
+							<ol>
+								<li>each component has quantity, reference designator and description (and manufacturer and part number / order number)</li>
+								<li>suggested and alternate manufacturer(s) listed</li>
+								<li>object/binary code and method/programmer specified for each programmable device</li>
+							</ol>
+						</li>
+						
+						<li>drill origin is a tooling hole</li>
+						<li>NC drill and photoplot file language format noted</li>
+						<li>tools on drill plot and NC drill file cross checked</li>
+						
+						
+						<li id="TAPEOUT">Check output files:
+							<ol>
+								<li>manufacturing output files checked in file viewer</li>
+								<li>All layers are aligned</li>
+								<li>All layers are present (file exists)</li>
+								<li>All layers have data (not just vias)</li>
+								<li>Is there a drill legend?</li>
+								<li>Board outlines/layers have the correct dimensions</li>
+								<li>Fill polygons have the right isolation, orphan settings and minimum neck width</li>
+								<li>Make sure your soldermask is correct near high-density parts (tented vias, etc.)</li>
+								<li>No tool errors spotted (output not matching design files)</li>
+								<li>Verify a netlist generated from output files against design netlist (if you have the tools to do so)</li>
+								<li>Test coupon on PCB containing minimum geometry features</li>
+								<li>Layer counter at PCB edge</li>
+							</ol>
+						</li>
+						
+						
+					</ol>
+				
+				</li>
+				
+				<li id="PCB_FINAL">Final
+					<ol>
+						<li>Does <abbr title="Electric rule check">ERC</abbr> pass?</li>
+						<li>Does <abbr title="Design rule check">DRC</abbr> pass?</li>
+						<li>Are there any superfluous vias?</li>
+						<li>Does <abbr title="Layout versus schematic">LVS</abbr> pass?
+							<span class="note">
+							<em>Layout Versus Schematic</em> is a check to confirm that the board layout actually implements the schematic. That is: Are the traces actually connecting the proper components? Resources: <a href="https://en.wikipedia.org/wiki/Layout_Versus_Schematic">Wikipedia</a>.
+							</span>
+						</li>
+					</ol>
+				</li>
+				
+				
+			</ol>
+		</li>
+			
+				
+				
+						
+						
+						
+	
+				
+		<li class="ORDER" id="ORDER"><h2>Ordering</h2>
+			<ol>
+				<li>Do production files match design files?
+					<ol>
+						<li>Missing or wrong geometry?
+							<span class="note">Complex geometry can sometimes cause errors during export. Pads and artwork can also be assigned to the wrong layers.</span>
+						</li>
+						<li>Right number of layers?</li>
+					</ol>
+				</li>
+				<li>Has the correct/latest files been uploaded?
+					<span class="note">Yes, this does happen.</span>
+				</li>
+			</ol>
+		</li>
+		<li class="INSP" id="INSP"><h2>Board inspection</h2>
+			<ol>
+				<li>Solder mask alignment</li>
+				<li>Solder mask curing</li>
+			</ol>
+		</li>
+		<li class="WIRE" id="WIRE"><h2>Wire harnesses</h2>
+			<ol>
+				<li>Wire gauge compatible with termination</li>
+				<li>Cable ties and lacing cord is noted where needed</li>
+				<li>Length and color is noted</li>
+				<li>Avoid signal and power in same connector</li>
+				<li>Avoid current flow to remote sources through earth</li>
+				<li>Is there a breakout board for the connector?</li>
+				<li>Application of wire termination is specified
+					<ol>
+						<li>Technique</li>
+						<li>Heat shrink tubing</li>
+						<li>Solder and type/amount thereof</li>
+						<li>Crimp force, Tools</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+		<li class="MECH" id="DRAW">Mechanical Drawings
+			<ol>
+				<li>standard title block and border used</li>
+				<li>no dimensions on the material</li>
+				<li>every feature must have X and Y dimension, along with radius, diameter, etc.</li>
+				<li>every hole must be checked for alignment with mating hole(s) in other parts</li>
+				<li>check every hole diameter</li>
+				<li>tolerance for sheet metal feature position noted</li>
+				<li>tolerance for sheet metal hole size noted</li>
+				<li>specify material</li>
+				<li>specify finish</li>
+				<li>specify units</li>
+				<li>specify debur or brush</li>
+				<li>details for special operations</li>
+				<li>file name on each sheet</li>
+				<li>CAD layers shown on drawing</li>
+				<li>all hardware specified and listed on parts list</li>
+				<li>screw lengths checked; extra thread required for fasteners (nut, lockwasher, washer)</li>
+				<li>hole diameters checked for each screw</li>
+				<li>tapped hole thread details indicated</li>
+			</ol>
+		</li>
+		<li class="SW" id="SW"><h2>Software</h2>
+			<ol>
+				<li>Is automated software testing used? #software #procedure</li>
+				<li>Is there a style guide?</li>
+				<li>Are loops checked for termination conditions?</li>
+				<li>Is power up and power down handled correctly?</li>
+				<li>Are unused interrupts handled? (Either restart or damage control)</li>
+				<li>Is there a difference between warm and cold reset?
+					<ol>
+						<li>How does the devices behave if only the software is reset?</li>
+					</ol>
+				</li>
+				<li>Memories
+					<ol>
+						<li>Are setup, hold and access times correct for external memories?</li>
+						<li>Is memory integrity checked?</li>
+						<li>Is memory integrity guaranteed?</li>
+						<li>Is unused program memory/<abbr title="Read-only memory">ROM</abbr> spaces filled with traps or restart instructions?</li>
+						<li>nonvolatile memory corruption possibilities checked during power-up, power-down, and program-gone-wild conditions</li>
+					</ol>
+				</li>
+				<li>Bounds checks
+					<ol>
+						<li>Is user/sensor input bounds checked?</li>
+						<li>Are outputs bounds checked?</li>
+						<li>Are calculations bounds checked?</li>
+						<li>Are buffer overflows handled?</li>
+					</ol>
+				</li>
+				<li>Data structures and formats
+					<ol>
+						<li>Do they include a version number or identifier?</li>
+						<li>Are the bounds of variable size formats well-defined?</li>
+					</ol>
+				</li>
+				<li>Software characteristics
+					<ol>
+						<li><abbr title="Central processing unit">CPU</abbr> utilization</li>
+						<li>Memory utilization</li>
+						<li>Interrupt response time</li>
+						<li>Interrupt execution time</li>
+						<li>Use a LINT utility on C programs to find subtle problems</li>
+					</ol>
+				</li>
+				<li>Versioning
+					<ol>
+						<li>How is software versioned? <span class="note">Semantic versioning is an excellent choice. References: <a href="https://semver.org/">Semantic Versioning</a></span></li>
+						<li>Is version defined in a header? <span class="note">
+							By defining the version in a header it is easy to update and consistently written.
+						</span></li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+		<li class="DOC" id="DOC"><h2>Documentation</h2>
+			<ol>
+				<li>Assembly instructions</li>
+				<li>Service instructions</li>
+				<li>Component list</li>
+				<li>Schematic diagrams</li>
+				<li><abbr title="Printed circuit board">PCB</abbr> explanation</li>
+				<li>Design decisions and design notes: why significant design decisions were made the way they were</li>
+				<li>End-user documents
+					<ol>
+						<li>Unpacking/Installation instructions</li>
+						<li>Usage instructions</li>
+						<li>Warranty</li>
+						<li>Troubleshooting instructions</li>
+						<li>Service hotline/address/e-mail</li>
+					</ol>
+				</li>
+			</ol>
+		</li>
+	
+	</ol>
+
+
+	</div>
+	
+	</form><!-- checklist form -->
+    
+	
+	
+	
+	<script type="text/javascript">
+		
+        //finalizeChecklistIDs('#frmChecklist')
+	
+		//processIntoChecklist('#frmChecklist')
+	</script>
+	
+  </body>
+</html>

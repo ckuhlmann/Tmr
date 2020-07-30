@@ -1,0 +1,190 @@
+ <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Universal Checklist</title>
+	<link rel="icon" href="favicon.svg" type="image/vnd.microsoft.icon">
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
+    <link rel="stylesheet" href="checklist.css">
+    
+    <script type="text/javascript">
+		var CLdocversion = "1.0.1";
+	</script>
+    
+    <script src="jquery.js"></script>
+    <!--<script src="zepto.js"></script>-->
+	<!--script src="fx.js"></script-->
+	
+	<!--<script src="jquery.js"></script>-->
+	
+
+    <!--script src="velocity.js"></script-->
+	<script src="checklist.js"></script>
+  </head>
+  <body>
+	
+	<div style="margin:0; padding:0; ;">
+		
+	<div class="linklist">
+    
+	    <a name="top"></a><a name="checklistlist"></a>
+	    <p><a href="PCBChecklist04.htm">Schematic/PCB Design checklist</a> | </p>
+	<p>
+		<a href="#CL0">CL0: Altium CAD Checklist </a> |
+		<a href="#CL1">CL1: Eagle CAD Checklist</a> |
+		<a href="#CL_AD_PROC">Altium Proceures</a> | 
+	</p>
+	</div>
+	
+	<a href="#SaveLoad">Save/Load</a> |
+	<div style="margin:0; padding:0; font-size:0.8em">Usage: use appropriate checklists. Checked state can be exported as ID-list (see buttons below) and re-imported from ID-list. ID lists are great to save checklist state with design files. <br>
+	Some functions require you to press ctrl or shift while clicking for safety reasons.</div>
+	</div>
+	
+	
+	<form name="frmChecklist" id="frmChecklist" action="">
+		
+	<div class="stickybar"></div>
+	
+	<a name="CL0"></a>
+	<div class="checklist">
+		
+	<h1>CL0: Altium CAD Checklist </h1> 
+	
+		<ol>
+			
+			<li id="ADSch" class="Sch">        Schematic: <!--span title="settings">Options</span> <span class="shortcut">(??)</span-->
+		        <ol>                                                 
+					<li>Verify Project Options (or proper project template)
+						<ol>
+							<li>Check Project Options &gt; Error reporting</li>
+							<li>Check Project Options &gt; Connection Matrix</li>
+							<li>Check Project Options &gt; Options &gt; Net Identifier Scope</li>
+						</ol>
+					</li>
+					<li>Run ERC check by compiling the project: Project &gt; Compile <span class="shortcut">(cc)</span> </li>
+					<li>Check connectivity with alt+click, alt+dblclick on net or using net highlight colors <span class="shortcut">(alt+click)</span> <span class="shortcut">(alt+doubleclick)</span></li>
+				</ol>                                             
+			</li>                                                 
+			<li id="ADPCB" class="PCB">        PCB:  
+				<ol>                                              
+					<li>Check Component links: Project &gt; Component links... <span class="shortcut">(ck)</span></li>
+					<li>Check for latest Schematic version: Design &gt; Import changes from... <span class="shortcut">(di)</span> </li>
+					
+					<li>Check for latest library files (tools &gt; update from PCB libraries) but apply only if no local changes were made. Otherwise, update manually. <span class="shortcut">(tl)</span> </li>
+					
+					<li>DRC
+						<ol>
+							<li>Check DRC settings and enabled DRC checks <span class="shortcut">(dr)</span>, <span class="shortcut">(td)</span></li>
+							<li>Polygons and planes are set to direct connect with vias (design rules), Polygons and planes are set to thermal relief connect (typically four connections) with component pads </li>
+							<li>In the Polygon Manager, check <i>every</i> Polygon's minimum neck width to be enabled and &ge; the minimum track width  <span class="shortcut">(tgm)</span>. Otherwise be aware that smaller necks are <i>not</i> reported by DRC as width or unrouted violations.</li>
+							<li>Run DRC <span class="shortcut">(tdr)</span>. Process every error.</li>
+						</ol>
+					</li>
+					
+					<li>Mechanical layers are used correctly. The default is  <br>| M01: Board outline and routed cut-outs | M02: PCB Info <br>| M11: Top Dimensions | M12: Bottom Dimensions <br>| M13: Top Component Outline And 3D Body | M14: Bottom Component Outline And 3D Body <br>| M15: Top Courtyard | M16: Bottom Courtyard </li>
+					
+					
+				</ol>
+			</li>
+			<li id="ADOut" class="ORDER">        Output generation:  
+				<ol>                                              
+					<li>Use newest / applicable Output Jobfile</li>
+					
+				</ol>
+			</li>
+			
+		</ol>
+	</div>
+	
+	
+	<a name="CL1"></a>
+	<div class="checklist">
+		
+	<h1>CL1: Eagle CAD Checklist </h1> 
+	
+		<ol>
+			
+			<li id="EaSch"  class="Sch">        Schematic:
+		        <ol style="display:none">                                                 
+					<li>Check connectivity with the show (eye) tool.</li>
+					
+				</ol>                                             
+			</li>                                                 
+			<li id="EaPCB"  class="PCB">        PCB:  
+				<ol style="display:none">                                              
+					<li>Check PCB is in sync with Schematic (forward/back annotation enabled, active)</li>
+					<li>Perform ratsnest, check that all polygons are pourred and no airwires remain</li>
+
+					<li>DRC
+						<ol>
+							<li>Check DRC settings (td)</li>
+							<li>Run DRC (tdr)</li>
+						</ol>
+					</li>
+					
+					<li>Check that only vector fonts are used</li>
+					
+
+				</ol>
+			</li>
+			<li class="ORDER">        Output:  
+				<ol style="display:none">                                              
+					<li>Use newest / applicable CAM Processor settings</li>
+					
+
+				</ol>
+			</li>
+			
+		</ol>
+	</div>
+	
+	
+
+	
+	
+	<div class="checklist">
+		<a name="CL_AD_PROC"></a>
+		<h1>ADPROC: Altium Procedures </h1>
+
+		<ol >
+			<li id="AD_BACKANNO"  class="PCB">Back-Annotation (PCB RefDes &rightarrow; Sch):
+		        <ol>
+					<li><b>Sch</b>: Project &gt; Compile<span class="shortcut">(cc)</span>
+					<li><b>PCB</b>: Check links: Project &gt; Component links <span class="shortcut">(ck)</span>, press Ok even, if no changes are reported.
+					<li>Verify board and schematic are up to date
+						<ol>
+							<li><b>PCB</b>: No changes reported for Design &gt; Import changes from ... <span class="shortcut">(di)</span>
+							<li><b>PCB</b>: No changes reported for Design &gt; Update schematics in ... <span class="shortcut">(du)</span>
+							<li><b>Sch</b>: No changes reported for Design &gt; Update PCB Document... <span class="shortcut">(du)</span>
+						</ol>
+
+					<!--li>PCB: Verify component links <span class="shortcut">(ck)</span>, press Ok even, if no changes are reported.     </li-->
+					<li><b>PCB</b>: Tools &gt; Re-Annotate <span class="shortcut">(tn)</span>
+					<li><b>Sch</b>: Project &gt; Compile <span class="shortcut">(cc)</span>
+					<li><b>Sch</b>: Project &gt; Re-Compile <span class="shortcut">(cr)</span>
+					<li><b>PCB</b>: Design &gt; Import Changes from... <span class="shortcut">(di)</span>
+					<!--li>PCB: Verify component links <span class="shortcut">(ck)</span>, press Ok even, if no changes are reported.     </li-->
+					<li>Save PCB and Sch
+
+				</ol>
+		</ol>
+	</div>
+	
+
+	</form><!-- checklist form -->
+    
+	
+	
+	
+	<script type="text/javascript">
+		var CLdocversion = "1.0.1";
+		
+        //finalizeChecklistIDs('#frmChecklist')
+	
+		//processIntoChecklist('#frmChecklist')
+	</script>
+	
+  </body>
+</html>
