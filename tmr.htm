@@ -420,7 +420,11 @@
  		}
  		
  		function StartBreakFromNotification(event) {
- 			//event.preventDefault();	// context switch so the break is encouraged
+			if ( !(document.getElementById('cbPlayAudio').checked) ) { // toDo: maybe control this sepaerately, use audio flag in the meantime
+ 				event.preventDefault();	// prevent context switch 
+			} else {
+				// context switch so the break is encouraged
+			}
  			
  			alertl('Notification action='+event.action)
  			if ((event.action === 'apply') || (event.action === 'undefined')) {
