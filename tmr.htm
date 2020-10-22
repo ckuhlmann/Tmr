@@ -17,6 +17,7 @@
 		input#remainDuration { font-weight:bold; }
 		
  		label { min-width: 140pt; display:inline-block; text-align:right; margin:0px 2px; padding:0;}
+		fieldset #rdWB { margin-left: 145pt; }
 		label[for=remainDuration] { font-weight:bold; }
  		label.nowidth, label.tlog { min-width:0; text-align:left; }
  		label.radio, label.checkbox { min-width: 17ex; display:inline-block; text-align:left; }
@@ -96,6 +97,9 @@
  		var isNotifying = 0;
  		var Notif = null;
  		var notify = null;
+		
+		var TmrGlobalStateList = {};
+		var TmrVersion = "v0.9.0";
  		
  		const tmrstate = {
 		    INIT: 'init',
@@ -117,13 +121,33 @@
 			tlog = document.getElementById("tlog");
 			tlog.value = dt + txt +"\r\n" + tlog.value;
 		}
+		
+		function isEmptyObj(obj) {
+			for(var key in obj) {
+				if(obj.hasOwnProperty(key))
+					return false;
+			}
+			return true;
+		}
  		
  		function clearSessionCounts() {
  			workSessionsStartedNum = 0;
  			workSessionsFinishedNum = 0;
  			breakSessionsStartedNum = 0;
  			breakSessionsFinishedNum = 0;
+			
+			renderTmrState();
  		}
+		
+		function clearSessionTimeSums() {
+			workSum = 0;
+			breakSum = 0;
+ 		
+			wrkDur = 0;
+			brkDur = 0;
+			
+			renderTmrState();
+		}
  		
  		function onTmrInt() {
  			tickTmr();
@@ -462,14 +486,18 @@
  						return;
 	 				break;
  			}
- 			
+			
  			tme = Date.now();
  			remDuration = evtTime - tme // negative: elapsed
  			
  			elaDuration = tme - startTime;
  			workSum+=elaDuration;
  			eladstr = duration2txt(elaDuration);
- 			alertl('Starting break after working for '+eladstr+'.')
+			
+			performAutosave()
+ 			
+			
+			alertl('Starting break after working for '+eladstr+'.')
  			
  			elaDuration = 0;
  			startTime = tme
@@ -548,8 +576,8 @@
  				Notif.close();
  			}
  			isNotifying = false;
- 			
- 			
+			
+			
  			switch (state) {
  				case tmrstate.INIT:
  						return;
@@ -567,7 +595,7 @@
  						// ok
 	 				break;
  			}
- 			
+			
  			workSessionsStartedNum += 1;
  			
  			tme = Date.now();
@@ -576,7 +604,11 @@
  			elaDuration = tme - startTime;
  			breakSum+=elaDuration;
  			eladstr = duration2txt(elaDuration);
- 			alertl('Starting work after a break of '+eladstr+'.')
+			
+			performAutosave()
+ 			
+			
+			alertl('Starting work after a break of '+eladstr+'.')
  			
  			elaDuration = 0;
  			startTime = tme
@@ -614,13 +646,61 @@
 			alertl('> Work started (for '+duration2txt(wd)+').')
  		}
  		
+		
+		function getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum) {
+			var statsstr = duration2txt(workSum)+' of work sessions: '+workSessionsStartedNum.toString()+' started ('+workSessionsFinishedNum.toString()+' finished) ' + '  /  ' + duration2txt(breakSum)+' of break sessions: '+breakSessionsStartedNum.toString()+' started ('+ breakSessionsFinishedNum.toString() +' finished)';
+			return statsstr;
+		}
+		
  		
+		function renderTmrState() {
+			dto = new Date()
+			
+			tme = Date.now();
+ 			//remDuration = evtTime - tme // negative: elapsed // do NOT recalculate in render routine, this only happens in tick
+ 			//elaDuration = tme - startTime  // do NOT recalculate in render routine, this only happens in tick
+			
+			document.getElementById('workSum').value = duration2txt(workSum);
+ 			document.getElementById('breakSum').value = duration2txt(breakSum);
+			
+ 			document.getElementById('edtstatus').value= state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped')
+ 			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
+ 			statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+ 			document.getElementById('edtstatistics').value= statsstr;
+			
+			remdstr = duration2txt(remDuration);
+ 			document.getElementById('remainDuration').value = remdstr;
+ 			
+ 			eladstr = duration2txt(elaDuration);
+ 			document.getElementById('elapsedDuration').value =eladstr;
+ 			
+			if ((evtTime != undefined) && (evtTime > 0)) {
+				wbtme = new Date(evtTime)
+				wrkbrktimestr = fmtDateTime(wbtme);
+				document.getElementById('WrkBrkTime').value = wrkbrktimestr;
+			}
+				
+ 			tmeobj = new Date(tme)
+ 			tmestr = fmtDateTime(tmeobj);
+ 			document.getElementById('DateTime').value = tmestr;
+ 			
+			ndstr = document.getElementById('notifyDuration').value;
+ 			nd = txt2duration(ndstr)
+			subsymbol = ''
+ 			if ((remDuration >= 0) && (remDuration <= nd) && (state != tmrstate.INIT)) {
+ 				subsymbol = '_ending';
+ 			}
+ 			document.getElementById('symbolimg').src = state.toString()+subsymbol+'.png';
+			
+		}
+		
  		function tickTmr() {
  			dto = new Date()
- 			statsstr = duration2txt(workSum)+' of work sessions: '+workSessionsStartedNum.toString()+' started ('+workSessionsFinishedNum.toString()+' finished) ' + '  /  ' + duration2txt(breakSum)+' of break sessions: '+breakSessionsStartedNum.toString()+' started ('+ breakSessionsFinishedNum.toString() +' finished)';
- 			document.getElementById('edtstatus').value= state2str(state) + ", "+ ((isRunning)? 'running':'stopped')
+			
+ 			document.getElementById('edtstatus').value= state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped')
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
- 			document.getElementById('edtstatistics').value= statsstr;
+ 			//statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+ 			//document.getElementById('edtstatistics').value= statsstr;
  			
  			if (!isRunning) { 
  				return; 
@@ -664,6 +744,9 @@
  					break;
  					
  				case tmrstate.WORKING:
+				
+				 	document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+ 			
  					if (remDuration < 0) {
  						if (!autoswitchtobreak) {
  							state = tmrstate.BREAKREQUIRED
@@ -699,8 +782,11 @@
  				
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
 	 				break;
  				case tmrstate.ONBREAK:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum);
+				
  					if (remDuration < 0) {
  						if (!autoswitchtowork) {
  							state = tmrstate.BREAKOVER
@@ -734,6 +820,7 @@
  					}
 	 				break;
  				case tmrstate.BREAKOVER:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum);
 	 				break;
  			}
  			
@@ -968,6 +1055,188 @@
 				}
 			}
 		}
+		
+		
+		/// (auto)save
+		
+		function getTmrState() {
+			var tstate = {};
+
+			tstate["startTime"] = startTime
+			tstate["startTime"] = startTime; // only valid when running, time when work/break started
+			tstate["evtTime"] = evtTime; // only valid when running, time when work/break ends/ended
+			tstate["remDuration"] = remDuration; // only valid when paused: remaining duration
+			tstate["elaDuration"] = elaDuration; // only valid when paused: elapsed duration
+			tstate["workSum"] = workSum;
+			tstate["breakSum"] = breakSum;
+			tstate["workSessionsStartedNum"] = workSessionsStartedNum;
+			tstate["workSessionsFinishedNum"] = workSessionsFinishedNum;
+			tstate["breakSessionsStartedNum"] = breakSessionsStartedNum;
+			tstate["breakSessionsFinishedNum"] = breakSessionsFinishedNum;
+			
+			tstate["wrkDur"] = wrkDur;
+			tstate["brkDur"] = brkDur;
+			
+			tstate["isNotifying"] = isNotifying;
+			tstate["Notif"] = Notif;
+			tstate["notify"] = notify;
+			
+			
+			tstate["TmrVersion"] = TmrVersion;
+			
+			tstate["state"] = state;
+			tstate["isRunning"] = isRunning;
+		
+		
+			
+			
+			TmrGlobalStateList = tstate;
+			return tstate;
+		}
+		
+		function restoreTmrState(tstate) {
+			
+			//startTime = tstate["startTime"]; // only valid when running, time when work/break started
+			//evtTime = tstate["evtTime"]; // only valid when running, time when work/break ends/ended
+			//remDuration = tstate["remDuration"]; // only valid when paused: remaining duration
+			//elaDuration = tstate["elaDuration"]; // only valid when paused: elapsed duration
+			workSum = tstate["workSum"];
+			breakSum = tstate["breakSum"];
+			workSessionsStartedNum = tstate["workSessionsStartedNum"];
+			workSessionsFinishedNum = tstate["workSessionsFinishedNum"];
+			breakSessionsStartedNum = tstate["breakSessionsStartedNum"];
+			breakSessionsFinishedNum = tstate["breakSessionsFinishedNum"];
+			
+			wrkDur = tstate["wrkDur"];
+			brkDur = tstate["brkDur"];
+			
+			//isNotifying = tstate["isNotifying"];
+			//Notif = tstate["Notif"];
+			//notify = tstate["notify"];
+			
+			//state = tstate["state"];
+			//isRunning = tstate["isRunning"];
+			
+			TmrGlobalStateList = tstate;
+			return true;
+		}
+		
+		function saveToLocalStorageUser() {
+			if (true || (TmrGlobalStateList == undefined) || (TmrGlobalStateList == null) || (isEmptyObj(TmrGlobalStateList))) { // always force update here to prevent flaws from event updates to cause problems
+				console.log('saveToLocalStorageUser: Initializing TmrGlobalStateList')
+				TmrGlobalStateList = getTmrState() // init
+			}
+
+			window.localStorage.setItem("TmrGlobalStateListUser",JSON.stringify(TmrGlobalStateList))
+			window.localStorage.setItem("TmrVersionUser",TmrVersion)
+
+			console.log('saveToLocalStorageUser: State saved.')
+
+			
+			alert('Saving complete. \n')
+
+		}
+		function restoreFromLocalStorageUser() {
+            var tmr_state = JSON.parse(window.localStorage.getItem("TmrGlobalStateListUser"))
+			var ver   = window.localStorage.getItem("TmrVersionUser")
+
+			if (tmr_state == null || ver == null) {
+				console.log('restoreFromLocalStorageUser: no data in localStorage. Nothing to restore.')
+				alert("Nothing in userspace of local storage.")
+				return false;
+			}
+
+			if (ver != TmrVersion) {
+				if (!window.confirm("Saved version is of version "+ver+" ("+tmr_state['TmrVersion']+") but current document is version "+TmrVersion+". Saved state may differ from what is being loaded. Proceed?")) {
+					console.log("restoreFromLocalStorageUser: version '"+ver+"' of stored data in localStorage differs from document version '"+TmrVersion+"'. Cannot restore safely. Aborting restore as requested.")
+					return false
+				} else {
+					console.log("restoreFromLocalStorageUser: version '"+ver+"' of stored data in localStorage differs from document version '"+TmrVersion+"'. Cannot restore safely. Continuing restore anyways as requested.")
+				}
+			}
+
+            TmrGlobalStateList = tmr_state;
+
+			delete tmr_state['TmrVersion']; // remove the version field, which should not be restored.
+			restoreTmrState(tmr_state); // load all states
+			
+			renderTmrState();
+
+            console.log("restoreFromLocalStorageUser: Restore successfully completed.");
+
+			alert('Restore complete. \n')
+            
+			return true;
+		}
+		function clearLocalStorageUser() {
+			if (!window.confirm("Clear local storage USER data? This cannot be undone. Unloaded states will be lost. Continue with deletion?")) { return; }
+
+            window.localStorage.removeItem("TmrGlobalStateListUser")
+			window.localStorage.removeItem("TmrVersionUser")
+			console.log("clearLocalStorageUser: Done.");
+		}
+		function clearAutosave() {
+			if (!window.confirm("Clear local storage autosave data? This cannot be undone. Unloaded states will be lost. Continue with deletion?")) { return; }
+
+            window.localStorage.removeItem("TmrGlobalStateListAuto")
+			window.localStorage.removeItem("TmrVersionAuto")
+			console.log("clearAutosave: Done.");
+		}
+
+		function clearLocalStorageAll() {
+			if (!window.confirm("Clear ALL local storage data? This cannot be undone. Unloaded states will be lost. Continue with deletion?")) { return; }
+			
+            window.localStorage.clear()
+			console.log("clearLocalStorageAll: Done.");
+		}
+
+		function performAutorestore() {
+			var tmr_state = JSON.parse(window.localStorage.getItem("TmrGlobalStateListAuto"))
+			var ver   = window.localStorage.getItem("TmrVersionAuto")
+
+			if (tmr_state == null || ver == null) {
+				console.log('performAutorestore: no data in localStorage. Nothing to restore.')
+				return false;
+			}
+
+			if (ver != TmrVersion) {
+				console.log("performAutorestore: version '"+ver+"' of stored data in localStorage differs from document version '"+TmrVersion+"'. Cannot restore safely. Aborting restore.")
+				return false;
+			}
+
+
+            TmrGlobalStateList = tmr_state;
+
+			delete tmr_state['TmrVersion']; // remove the version field, which should not be restored.
+			restoreTmrState(tmr_state); // load all states
+
+			renderTmrState();
+			
+            console.log("performAutorestore: Restore successfully completed.");
+			return true;
+
+		}
+
+		
+
+		function setupAutosave(settingsobj) {
+            
+
+		}
+
+		function performAutosave() {
+			if (true || (TmrGlobalStateList == undefined) || (TmrGlobalStateList == null) || (isEmptyObj(TmrGlobalStateList))) {
+				console.log('performAutosave: Initializing TmrGlobalStateList')
+				TmrGlobalStateList = getTmrState() // init
+			}
+		
+			window.localStorage.setItem("TmrGlobalStateListAuto",JSON.stringify(TmrGlobalStateList))
+			window.localStorage.setItem("TmrVersionAuto",TmrVersion)
+			console.log("performAutosave: completed.");
+		}
+		
+		
+		
  	</script>
  </head>
  
@@ -1008,7 +1277,7 @@
 		  	
 		  <input type="checkbox" id="cbDesktopNotify" name="cbDesktopNotify" value="1" checked /><label for="cbDesktopNotify" class="checkbox">Show Desktop Notifications (if allowed by browser)</label> <br/>
 		  	
-		  <input type="checkbox" id="cbFocusTmrOnBreak" name="cbFocusTmrOnBreak" value="1" checked /><label for="cbFocusTmrOnBreak" class="checkbox">Focus the timer after clicking on notifications for breaks to give more incentive to take them.</label> <br/>	
+		  <input type="checkbox" id="cbFocusTmrOnBreak" name="cbFocusTmrOnBreak" value="1" checked /><label for="cbFocusTmrOnBreak" class="checkbox">Focus the timer after clicking on notifications for breaks (to give you more incentive to take them)</label> <br/>	
 			
 		  <input type="checkbox" id="cbPlayAudio" name="cbPlayAudio" value="1" checked /><label for="cbPlayAudio" class="checkbox">Play Audio Notifications (if allowed by browser)</label> <br/>
 		  
@@ -1025,15 +1294,13 @@
 	  </fieldset>
 	  <br/>
 
-	  <fieldset id="rdWB">
-	  	<legend>Currently</legend>
-	  	<input type="radio" id="rbWrkBrk_Wrk" name="rbWrkBrk" value="Work" checked /><label for="rbWrkBrk_Wrk" class="radio">Working</label> <br/>
-	  	<input type="radio" id="rbWrkBrk_Brk" name="rbWrkBrk" value="Break" /><label for="rbWrkBrk_Brk" class="radio">On Break</label> <br/>
-	  </fieldset>
+	  
 	  <br/>
 
 	  <fieldset id="status">
 		  <legend>Status</legend>	  
+		  
+		  <img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px; float:right;" id="symbolimg">
 		  
 		  <label for="elapsedDuration">Elapsed Duration:</label>
 		  <input type="text" id="elapsedDuration" name="elapsedDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"><br/>
@@ -1043,6 +1310,14 @@
 		  <input type="text" id="DateTime" name="DateTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"><br/>
 		  <label for="WrkBrkTime">Next Work/Break at:</label>
 		  <input type="text" id="WrkBrkTime" name="WrkBrkTime" pattern="[\d]{4}-[\d]{2}-[\d]{2} [\d]{2}:[\d]{2}:[\d]{2}" title="Use time format 'yyyy-mm-dd hh:mm:ss'" value="0000-00-00 00:00:00"><br/>
+		  
+		  <fieldset id="rdWB">
+			<legend>Currently</legend>
+			<input type="radio" id="rbWrkBrk_Wrk" name="rbWrkBrk" value="Work" checked disabled /><label for="rbWrkBrk_Wrk" class="radio" >Working</label> <br/>
+			<input type="radio" id="rbWrkBrk_Brk" name="rbWrkBrk" value="Break" disabled /><label for="rbWrkBrk_Brk" class="radio" >On Break</label> 
+		  </fieldset>
+		  
+		  <div style="clear:both; padding:1px 0px;"></div>
 		  <label for="edtstatus">Status:</label>
 		  <input type="text" id="edtstatus" name="edtstatus" value="" size="50"> <br/>
 	  </fieldset>
@@ -1058,15 +1333,41 @@
 	  </fieldset>
 	  <br/>
 	  
+	  <fieldset id="statisticactions">
+		  <legend>Statistics</legend>	  
+			  <label for="workSum">Total Work Duration:</label>
+			  <input type="text" id="workSum" name="workSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+			  <label for="breakSum">Total Break Duration:</label>
+			  <input type="text" id="breakSum" name="breakSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+		  
+			  <label for="edtstatistics" class="nowidth">Statistics:</label>
+			  <input type="text" id="edtstatistics" name="edtstatistics" value="" size="85"> <br/>
+			  
+			  <label for="nothing1" class="">Reset stats:</label>
+			  <input type="button"  id="btnClearSessionCounts" onClick="clearSessionCounts()" value="Clear Session Counters">
+			  <input type="button"  id="btnClearSessionTimeSums" onClick="clearSessionTimeSums()" value="Clear Session Time Sums">
+			  <input type="button"  id="btnClearSessionTimeSums" onClick="clearSessionCounts(); clearSessionTimeSums();" value="Clear Count and Time Sums">
+		  </fieldset>
+		  
+		  
+		  <fieldset id="localstorageactions">
+		  <legend>Local Storage</legend>	  
+		   	<input type="button" name="btnSaveLocal" value="Save to local storage" onClick="saveToLocalStorageUser();">
+			<input type="button" name="btnLoadLocal" value="Load from local storage" onClick="restoreFromLocalStorageUser();">
+			<input type="button" name="btnClearLocalUser" value="Clear data (user)" onClick="clearLocalStorageUser();">
+			<input type="button" name="btnClearLocalAuto" value="Clear data (autosave)" onClick="clearAutosave();">
+			<input type="button" name="btnClearLocalAll" value="Clear data (everything)" onClick="clearLocalStorageAll();"><br/>
+	  </fieldset>
+		  
+	  <br/><br/>
 	  <input type="reset">
 	  <input type="submit">
-	  <input type="button"  id="btnClearSessionCounts" onClick="clearSessionCounts()" value="Clear Session Counters">
 	  <input type="button"  id="btnClrLog" onClick="document.getElementById('tlog').value ='';" value="Clear Log">
 	  
 	  <br/>
 	  <label for="tlog" class="tlog">Log:</label> <br/>  
 	  <textarea cols="55" rows="10" id="tlog"></textarea>
-	  <img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px;" id="symbolimg">
+	  <!--img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px;" id="symbolimg"-->
 	</form>
  	
  	<audio id="audio_breakover">
@@ -1085,16 +1386,16 @@
  		
  	<footer>
  		<form id="sums" action="#">
- 		  <label for="workSum">Total Work Duration:</label>
-		  <input type="text" id="workSum" name="workSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
-		  <label for="breakSum">Total Break Duration:</label>
-		  <input type="text" id="breakSum" name="breakSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
+ 		  
 		  
-		  <label for="edtstatus" class="nowidth">Statistics:</label>
-		  <input type="text" id="edtstatistics" name="edtstatistics" value="" size="85"> <br/>
+		  
 		  <a href="licenses.htm">Licenses and Acknowledgments</a>
  		</form>
  	</footer>
+	
+	<script type="text/javascript">
+		performAutorestore();
+	</script>
  
  </body>
  
