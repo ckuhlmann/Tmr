@@ -114,7 +114,17 @@
 		let state = tmrstate.INIT;
 
  		
- 		function alertl(txt) {
+ 		function alertl(txt, lvl) {
+			if ((lvl == undefined) || (lvl == null)) {
+			    lvl = 2;
+			}
+			var printlvl = ((document.getElementById("cbDebugLog").checked)? 4 : 1);
+			
+			if (lvl > printlvl) {
+			    // too verbose for log setting
+			    console.log("debug output suppressed on log textarea: "+txt);
+			    return;
+			}
 			dto = new Date();
 			dt = fmtDateTime(dto)+'.';//dto.getHours()+":"+dto.getMinutes()+":"+dto.getSeconds()+" "
 			//no = "$"+lognum++ + " "
@@ -261,7 +271,7 @@
  						
  						isRunning = true;
  						
- 						alertl('> Tmr initially started.')
+ 						alertl('> Tmr initially started.',1)
  						
  					break;
  					
@@ -279,7 +289,7 @@
 	 					
 	 					isRunning = true;
 	 					
-	 					alertl('> Tmr resumed.')
+	 					alertl('> Tmr resumed.',1)
  					
  					break;
  			}
@@ -358,7 +368,7 @@
  			
  			document.getElementById('frmTmr').className = 'paused'
  			
- 			alertl('> Tmr paused.')
+ 			alertl('> Tmr paused.',1)
  		}
  		
  		function determineWorkDuration() {
@@ -439,7 +449,7 @@
 				// standard break
 				var dur = bd;
 			}
-			//alertl("DEBUG: bd="+duration2txt(dur))
+			//alertl("DEBUG: bd="+duration2txt(dur),3)
 			return dur;
  		}
  		
@@ -450,7 +460,7 @@
 				// context switch so the break is encouraged
 			}
  			
- 			alertl('Notification action='+event.action)
+ 			alertl('Notification action='+event.action,3)
  			if ((event.action === 'apply') || (event.action === 'undefined')) {
  				StartBreak()
  			} else if (event.action === 'pause') {
@@ -497,7 +507,7 @@
 			performAutosave()
  			
 			
-			alertl('Starting break after working for '+eladstr+'.')
+			alertl(' # Starting break after working for '+eladstr+'.',1)
  			
  			elaDuration = 0;
  			startTime = tme
@@ -537,7 +547,7 @@
 			document.getElementById('rbWrkBrk_Wrk').checked = false
 			
 			var dur = determineBreakDuration()
-			//alertl("DEBUG2: bd="+duration2txt(dur))
+			//alertl("DEBUG2: bd="+duration2txt(dur),3)
 			var longb = isLongBreak()
 			
 			if (longb) {
@@ -552,13 +562,13 @@
 			
 			breakSessionsStartedNum += 1;
 			
-			alertl(msg)
+			alertl(msg,1)
  		}
  		
  		function StartWorkFromNotification(event) {
  			event.preventDefault();
  			
- 			alertl('Notification action='+event.action)
+ 			alertl('Notification action='+event.action,3)
  			if ((event.action === 'apply') || (event.action === 'undefined')) {
  				StartWork()
  			} else if (event.action === 'pause') {
@@ -608,7 +618,7 @@
 			performAutosave()
  			
 			
-			alertl('Starting work after a break of '+eladstr+'.')
+			alertl(' # Starting work after a break of '+eladstr+'.',1)
  			
  			elaDuration = 0;
  			startTime = tme
@@ -643,7 +653,7 @@
 		
 			var tmrEvt = window.setTimeout(onTmrEvt, dur)
 			
-			alertl('> Work started (for '+duration2txt(wd)+').')
+			alertl('> Work started (for '+duration2txt(wd)+').',1)
  		}
  		
 		
@@ -755,7 +765,7 @@
  							
  							onclickfn = window['StartBreakFromNotification'];
  							applymsg = 'Start my break';
- 							alertl('> Break required.')
+ 							alertl('> Break required.',1)
  						} else {
  							state = tmrstate.BREAKREQUIRED
  							workSessionsFinishedNum += 1;
@@ -763,13 +773,13 @@
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  alertl('Play audio '+audio.id);
+				 				  alertl('Play audio '+audio.id,3);
 				 				} catch(err) {
-								  alertl(err.message);
+								  alertl(err.message,3);
 								}
 				 			}
  							
- 							alertl('> Break required, autostarting break...')
+ 							alertl('> Break required, autostarting break...',1)
  							
  							StartBreak();
  							
@@ -795,7 +805,7 @@
  							
  							onclickfn = window['StartWorkFromNotification'];
  							applymsg = 'Start working';
- 							alertl('> Break over.')
+ 							alertl('> Break over.',1)
  						} else {
  							state = tmrstate.BREAKOVER
  							breakSessionsFinishedNum += 1;
@@ -803,13 +813,13 @@
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
 				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
-				 				  alertl('Play audio '+audio.id);
+				 				  alertl('Play audio '+audio.id,3);
 				 				} catch(err) {
-								  alertl(err.message);
+								  alertl(err.message,3);
 								}
 				 			}
  							
- 							alertl('> Break over, autostarting work...')
+ 							alertl('> Break over, autostarting work...',1)
  							StartWork();
  							
  							tme = Date.now();
@@ -831,7 +841,7 @@
  				if ((!isNotifying) && (onclickfn !== null)) {
  					isNotifying = true;
  					if (document.getElementById('cbDesktopNotify').checked) {
- 						alertl('Notifying...');
+ 						alertl('Notifying...',3);
  						Notif = showDesktopNotification(state2str(state), state2strlong(state), state.toString()+'.png', onclickfn, null, applymsg);
  					}
  					
@@ -841,9 +851,9 @@
 		 				  //var audio = new Audio(audiofile); audio.play();
 		 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
 		 				  
-		 				  alertl('Play audio '+audio.id);
+		 				  alertl('Play audio '+audio.id,3);
 		 				} catch(err) {
-						  alertl(err.message);
+						  alertl(err.message,3);
 						}
 		 			}
  				}
@@ -1002,7 +1012,7 @@
  		function showDesktopNotification(title, msg, iconurl, onclickfn, onclosefn, applymsg) {
  			
 		    if (!window.Notification) {
-				alertl('Browser does not support notifications.');
+				alertl('Browser does not support notifications.',3);
 			} else {
 				// check if permission is already granted
 				if (Notification.permission === 'granted') {
@@ -1045,11 +1055,11 @@
 							notify.onclose = onclosefn;
 						} else {
 							console.log('User blocked notifications.');
-							alertl('User blocked notifications.');
+							alertl('User blocked notifications.',3);
 						}
 					}).catch(function (err) {
 						console.error(err);
-						alertl(err);
+						alertl(err,3);
 					});
 					return notify;
 				}
@@ -1319,7 +1329,7 @@
 		  
 		  <div style="clear:both; padding:1px 0px;"></div>
 		  <label for="edtstatus">Status:</label>
-		  <input type="text" id="edtstatus" name="edtstatus" value="" size="50"> <br/>
+		  <input type="text" id="edtstatus" name="edtstatus" value="" size="55"> <br/>
 	  </fieldset>
 	  <br/>
 	  
@@ -1363,7 +1373,7 @@
 	  <input type="reset">
 	  <input type="submit">
 	  <input type="button"  id="btnClrLog" onClick="document.getElementById('tlog').value ='';" value="Clear Log">
-	  
+	  <input type="checkbox" id="cbDebugLog" name="cbDebugLog" value="1" /><label for="cbDebugLog" class="checkbox">Verbose (debug) log</label> <br/>
 	  <br/>
 	  <label for="tlog" class="tlog">Log:</label> <br/>  
 	  <textarea cols="55" rows="10" id="tlog"></textarea>
