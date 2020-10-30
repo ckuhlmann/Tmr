@@ -666,7 +666,12 @@
 			return statsstr;
 		}
 		
- 		
+ 		function displayStatus(txt) {
+			document.title = txt + " (Work/Break Tmr)";
+			document.getElementById('edtstatus').value= txt;
+		}
+		
+		
 		function renderTmrState() {
 			dto = new Date()
 			
@@ -677,7 +682,7 @@
 			document.getElementById('workSum').value = duration2txt(workSum);
  			document.getElementById('breakSum').value = duration2txt(breakSum);
 			
- 			document.getElementById('edtstatus').value= state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped')
+ 			displayStatus( state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
  			statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
  			document.getElementById('edtstatistics').value= statsstr;
@@ -711,7 +716,7 @@
  		function tickTmr() {
  			dto = new Date()
 			
- 			document.getElementById('edtstatus').value= state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped')
+ 			displayStatus( state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
  			//statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
  			//document.getElementById('edtstatistics').value= statsstr;
