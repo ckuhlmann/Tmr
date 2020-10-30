@@ -200,6 +200,35 @@
  			}
  			return "";
  		}
+		
+		function state2strshort(st) {
+ 			switch (st) {
+ 				case tmrstate.INIT:
+ 						return "Initialized."
+ 					break;
+ 				case tmrstate.WORKING:
+						return "Work session."
+	 				break;
+ 				case tmrstate.BREAKREQUIRED:
+						if (isLongBreak()) {
+							return "Take a LONG break ("+ duration2txt(determineBreakDuration())+')'
+						} else {
+							return "Take a break ("+ duration2txt(determineBreakDuration())+')'
+						}
+	 				break;
+ 				case tmrstate.ONBREAK:
+						if (isLongBreak()) {
+							return "Long break."
+						} else {
+							return "Break."
+						}
+	 				break;
+ 				case tmrstate.BREAKOVER:
+ 						return "Finish your break (work for "+ duration2txt(determineWorkDuration())+').'
+	 				break;
+ 			}
+ 			return "";
+ 		}
  		
  		function state2strlong(st) {
  			str = "Hi there. "
@@ -666,8 +695,8 @@
 			return statsstr;
 		}
 		
- 		function displayStatus(txt) {
-			document.title = txt + " (Work/Break Tmr)";
+ 		function displayStatus(state, running, txt) {
+			document.title = ((isRunning)? '':'Tmr Stopped. ') + state2strshort(state) + " (Work/Break Tmr)";
 			document.getElementById('edtstatus').value= txt;
 		}
 		
@@ -682,7 +711,7 @@
 			document.getElementById('workSum').value = duration2txt(workSum);
  			document.getElementById('breakSum').value = duration2txt(breakSum);
 			
- 			displayStatus( state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
+ 			displayStatus(state,isRunning, state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
  			statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
  			document.getElementById('edtstatistics').value= statsstr;
@@ -716,7 +745,7 @@
  		function tickTmr() {
  			dto = new Date()
 			
- 			displayStatus( state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
+ 			displayStatus(state,isRunning, state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
  			//statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
  			//document.getElementById('edtstatistics').value= statsstr;
