@@ -1,4 +1,4 @@
-﻿ <!DOCTYPE HTML lang="en">
+ <!DOCTYPE HTML lang="en">
  <html>
  
  <head>
@@ -114,6 +114,10 @@
 		let state = tmrstate.INIT;
 
  		
+		function clearLog() {
+			document.getElementById("tlog").value = "";
+		}
+		
  		function alertl(txt, lvl) {
 			if ((lvl == undefined) || (lvl == null)) {
 			    lvl = 2;
@@ -1071,6 +1075,8 @@
 		
 		function getTmrState() {
 			var tstate = {};
+			
+			tstate = _getTmrFormState(tstate);
 
 			tstate["startTime"] = startTime
 			tstate["startTime"] = startTime; // only valid when running, time when work/break started
@@ -1104,7 +1110,85 @@
 			return tstate;
 		}
 		
+		function _getTmrFormState(tstate) {
+			if (tstate["frm"] == undefined) {
+				tstate["frm"] = {};
+			}
+			tstate["frm"]["workDuration"] 			 = document.getElementById("workDuration").value
+			tstate["frm"]["breakDuration"] 			 = document.getElementById("breakDuration").value
+			tstate["frm"]["longBreakDuration"] 		 = document.getElementById("longBreakDuration").value
+			tstate["frm"]["longBreakAfter"] 		 = document.getElementById("longBreakAfter").value
+			tstate["frm"]["notifyDuration"] 		 = document.getElementById("notifyDuration").value
+			tstate["frm"]["cbAutoSwitchToWork"] 	 = document.getElementById("cbAutoSwitchToWork").checked
+			tstate["frm"]["cbAutoSwitchToBreak"] 	 = document.getElementById("cbAutoSwitchToBreak").checked
+			tstate["frm"]["cbEnableLongBreaks"] 	 = document.getElementById("cbEnableLongBreaks").checked
+			tstate["frm"]["cbLongbreaksCountOnlyCompletedWork"] 	 = document.getElementById("cbLongbreaksCountOnlyCompletedWork").checked
+			tstate["frm"]["cbDesktopNotify"] 		 = document.getElementById("cbDesktopNotify").checked
+			tstate["frm"]["cbFocusTmrOnBreak"] 		 = document.getElementById("cbFocusTmrOnBreak").checked
+			tstate["frm"]["cbPlayAudio"] 			 = document.getElementById("cbPlayAudio").checked
+			tstate["frm"]["cbAutoRunOnLoad"] 		 = document.getElementById("cbAutoRunOnLoad").checked
+			tstate["frm"]["elapsedDuration"] 		 = document.getElementById("elapsedDuration").value
+			tstate["frm"]["remainDuration"] 		 = document.getElementById("remainDuration").value
+			tstate["frm"]["DateTime"] 				 = document.getElementById("DateTime").value
+			tstate["frm"]["WrkBrkTime"] 			 = document.getElementById("WrkBrkTime").value
+			tstate["frm"]["rbWrkBrk_Wrk"] 			 = document.getElementById("rbWrkBrk_Wrk").checked
+			tstate["frm"]["rbWrkBrk_Brk"] 			 = document.getElementById("rbWrkBrk_Brk").checked
+			tstate["frm"]["edtstatus"] 				 = document.getElementById("edtstatus").value
+			tstate["frm"]["workSum"] 				 = document.getElementById("workSum").value
+			tstate["frm"]["breakSum"] 				 = document.getElementById("breakSum").value
+			tstate["frm"]["edtstatistics"] 			 = document.getElementById("edtstatistics").value
+			tstate["frm"]["cbDebugLog"] 			 = document.getElementById("cbDebugLog").checked
+			tstate["frm"]["tlog"] 					 = document.getElementById("tlog").value
+
+			return tstate
+		}
+		
+		function _restoreTmrFormState(tstate) {
+			if (tstate["frm"] == undefined) {
+				return false;
+			}
+			try {
+				document.getElementById("workDuration").value			 = tstate["frm"]["workDuration"];
+				document.getElementById("breakDuration").value			 = tstate["frm"]["breakDuration"];
+				document.getElementById("longBreakDuration").value		 = tstate["frm"]["longBreakDuration"];
+				document.getElementById("longBreakAfter").value			 = tstate["frm"]["longBreakAfter"];
+				document.getElementById("notifyDuration").value			 = tstate["frm"]["notifyDuration"];
+				document.getElementById("cbAutoSwitchToWork").checked	 = tstate["frm"]["cbAutoSwitchToWork"];
+				document.getElementById("cbAutoSwitchToBreak").checked	 = tstate["frm"]["cbAutoSwitchToBreak"];
+				document.getElementById("cbEnableLongBreaks").checked	 = tstate["frm"]["cbEnableLongBreaks"];
+				document.getElementById("cbLongbreaksCountOnlyCompletedWork").checked	 = tstate["frm"]["cbLongbreaksCountOnlyCompletedWork"];
+				document.getElementById("cbDesktopNotify").checked		 = tstate["frm"]["cbDesktopNotify"];
+				document.getElementById("cbFocusTmrOnBreak").checked	 = tstate["frm"]["cbFocusTmrOnBreak"];
+				document.getElementById("cbPlayAudio").checked			 = tstate["frm"]["cbPlayAudio"];
+				document.getElementById("cbAutoRunOnLoad").checked		 = tstate["frm"]["cbAutoRunOnLoad"];
+				document.getElementById("elapsedDuration").value		 = tstate["frm"]["elapsedDuration"];
+				document.getElementById("remainDuration").value			 = tstate["frm"]["remainDuration"];
+				document.getElementById("DateTime").value				 = tstate["frm"]["DateTime"];
+				document.getElementById("WrkBrkTime").value				 = tstate["frm"]["WrkBrkTime"];
+				document.getElementById("rbWrkBrk_Wrk").checked			 = tstate["frm"]["rbWrkBrk_Wrk"];
+				document.getElementById("rbWrkBrk_Brk").checked			 = tstate["frm"]["rbWrkBrk_Brk"];
+				document.getElementById("edtstatus").value				 = tstate["frm"]["edtstatus"];
+				document.getElementById("workSum").value				 = tstate["frm"]["workSum"];
+				document.getElementById("breakSum").value				 = tstate["frm"]["breakSum"];
+				document.getElementById("edtstatistics").value			 = tstate["frm"]["edtstatistics"];
+				document.getElementById("cbDebugLog").checked			 = tstate["frm"]["cbDebugLog"];
+
+				var oldlog = tstate["frm"]["tlog"];
+				if (typeof(oldlog) != "string") {
+					oldlog = "Error: non-string-data encountered.";
+				}
+				dt = fmtDateTime(dto)+'.';
+				document.getElementById("tlog").value					 = "\r\n"+dt+"--- end of restored log --- \r\n" + oldlog + "\r\n"+dt+"^^^ restored log ^^^ \r\n" + document.getElementById("tlog").value; // exception: keep current log
+			} catch (e) {
+				alertl(e,3);
+				return false;
+			}
+			return true;
+		}
+		
 		function restoreTmrState(tstate) {
+		
+			_restoreTmrFormState(tstate); // restore gui
 			
 			//startTime = tstate["startTime"]; // only valid when running, time when work/break started
 			//evtTime = tstate["evtTime"]; // only valid when running, time when work/break ends/ended
@@ -1128,7 +1212,11 @@
 			//isRunning = tstate["isRunning"];
 			
 			TmrGlobalStateList = tstate;
+			
+			//renderTmrState();
+			
 			return true;
+			// after calling, run renderTmrState() to update gui with internal state.
 		}
 		
 		function saveToLocalStorageUser() {
@@ -1200,7 +1288,9 @@
 			console.log("clearLocalStorageAll: Done.");
 		}
 
-		function performAutorestore() {
+		function restoreFromAutosave() {
+			// plain or manual autorestore
+			
 			var tmr_state = JSON.parse(window.localStorage.getItem("TmrGlobalStateListAuto"))
 			var ver   = window.localStorage.getItem("TmrVersionAuto")
 
@@ -1223,7 +1313,49 @@
 			renderTmrState();
 			
             console.log("performAutorestore: Restore successfully completed.");
+			
+			alertl("Restore from Autosave data complete.",1);
 			return true;
+		}
+		
+		function performAutorestore() {
+			// autorestore at script startup
+			clearLog();
+		
+			
+			var tmr_state_usr = JSON.parse(window.localStorage.getItem("TmrGlobalStateListUser"))
+			var ver_usr   = window.localStorage.getItem("TmrVersionUser")
+			
+			// check if userdata has the autorun flag set
+			if ((tmr_state_usr != null) && (tmr_state_usr != undefined) && (tmr_state_usr["frm"] != null) && (tmr_state_usr["frm"] != undefined)
+			    && (tmr_state_usr["frm"]["cbAutoRunOnLoad"] != null) && (tmr_state_usr["frm"]["cbAutoRunOnLoad"] != undefined) ) {
+				if ((tmr_state_usr["frm"]["cbAutoRunOnLoad"] == true) || (tmr_state_usr["frm"]["cbAutoRunOnLoad"] == 1)) {
+					if ((ver_usr == null) || (ver_usr != TmrVersion)) {
+						alertl("Performing autorun failed, version mismatch of stored userdata in local storage. Save userdata again to fix this.",1);
+					} else {
+						alertl("--- Performing autorun as requested by local storage userdata...",1);
+						
+						TmrGlobalStateList = tmr_state_usr;
+
+						delete tmr_state_usr['TmrVersion']; // remove the version field, which should not be restored.
+						restoreTmrState(tmr_state_usr); // load all states
+
+						renderTmrState();
+						
+						console.log("performAutorestore: Restore of usersave successfully completed.");
+						
+						alertl("--- Autorun-restore complete, starting work.",1);
+						
+						StartWork();
+						
+						console.log("performAutorestore: Work session started. performAutorestore complete.");
+						return true;
+					}
+				}
+			}
+			
+			
+			return restoreFromAutosave();
 
 		}
 
@@ -1291,6 +1423,7 @@
 			
 		  <input type="checkbox" id="cbPlayAudio" name="cbPlayAudio" value="1" checked /><label for="cbPlayAudio" class="checkbox">Play Audio Notifications (if allowed by browser)</label> <br/>
 		  
+		  <input type="checkbox" id="cbAutoRunOnLoad" name="cbAutoRunOnLoad" value="1" /><label for="cbAutoRunOnLoad" class="checkbox">Automatically run on page load with user settings from local storage (save (again) to local storage update setting)</label> <br/>
 		  
 		  <input type="button" onClick="validateInput()" value="Check">
 		  Presets: 
@@ -1364,6 +1497,7 @@
 		  <legend>Local Storage</legend>	  
 		   	<input type="button" name="btnSaveLocal" value="Save to local storage" onClick="saveToLocalStorageUser();">
 			<input type="button" name="btnLoadLocal" value="Load from local storage" onClick="restoreFromLocalStorageUser();">
+			<input type="button" name="btnLoadLocal" value="Load autosave" onClick="restoreFromAutosave();">
 			<input type="button" name="btnClearLocalUser" value="Clear data (user)" onClick="clearLocalStorageUser();">
 			<input type="button" name="btnClearLocalAuto" value="Clear data (autosave)" onClick="clearAutosave();">
 			<input type="button" name="btnClearLocalAll" value="Clear data (everything)" onClick="clearLocalStorageAll();"><br/>
@@ -1372,7 +1506,7 @@
 	  <br/><br/>
 	  <input type="reset">
 	  <input type="submit">
-	  <input type="button"  id="btnClrLog" onClick="document.getElementById('tlog').value ='';" value="Clear Log">
+	  <input type="button"  id="btnClrLog" onClick="clearLog();" value="Clear Log">
 	  <input type="checkbox" id="cbDebugLog" name="cbDebugLog" value="1" /><label for="cbDebugLog" class="checkbox">Verbose (debug) log</label> <br/>
 	  <br/>
 	  <label for="tlog" class="tlog">Log:</label> <br/>  
