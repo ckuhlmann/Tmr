@@ -24,6 +24,7 @@
  		label.log { display:inline-block; text-align:left; }
  		fieldset { border: 1px solid #E0E0E0; display:inline-block; }
  		.btnBig {min-width: 25ex; min-height: 5em;}
+		.btnMedium {min-width: 25ex; min-height: 2.5em;}
  		
  		#frmTmr { border: 10px solid transparent; padding: 4px; }
  		
@@ -90,6 +91,11 @@
  		var workSessionsFinishedNum = 0;
  		var breakSessionsStartedNum = 0;
  		var breakSessionsFinishedNum = 0;
+		var longBreakSessionsStartedNum = 0;
+ 		var longBreakSessionsFinishedNum = 0;
+		
+		var workSessionsStartedSinceLongBreakNum = 0;
+ 		var workSessionsFinishedSinceLongBreakNum = 0;
  		
  		var wrkDur = 0;
  		var brkDur = 0;
@@ -99,14 +105,23 @@
  		var notify = null;
 		
 		var TmrGlobalStateList = {};
-		var TmrVersion = "v0.9.0";
+		var TmrVersion = "v0.9.2";
  		
  		const tmrstate = {
 		    INIT: 'init',
 		    WORKING: 'working',
 		    BREAKREQUIRED: 'breakrequired',
+			LONGBREAKREQUIRED: 'longbreakrequired',
 		    ONBREAK: 'onbreak',
-		    BREAKOVER: 'breakover'
+			ONLONGBREAK: 'onlongbreak',
+		    BREAKOVER: 'breakover',
+			LONGBREAKOVER: 'longbreakover'
+		}
+		
+		const breaktype = {
+			UNDEFINEDBREAK: 'undefinedbreak',
+		    SHORTBREAK: 'shortbreak',
+			LONGBREAK: 'longbreak'
 		}
 		
 		var isRunning = false;
@@ -149,6 +164,11 @@
  			workSessionsFinishedNum = 0;
  			breakSessionsStartedNum = 0;
  			breakSessionsFinishedNum = 0;
+			longBreakSessionsStartedNum = 0;
+ 			longBreakSessionsFinishedNum = 0;
+			
+			workSessionsStartedSinceLongBreakNum = 0;
+			workSessionsFinishedSinceLongBreakNum = 0;
 			
 			renderTmrState();
  		}
@@ -181,6 +201,7 @@
 						return "You should be working."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+				case tmrstate.LONGBREAKREQUIRED:
 						if (isLongBreak()) {
 							return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
 						} else {
@@ -188,6 +209,7 @@
 						}
 	 				break;
  				case tmrstate.ONBREAK:
+				case tmrstate.ONLONGBREAK:
 						if (isLongBreak()) {
 							return "You should be taking a long break."
 						} else {
@@ -195,6 +217,7 @@
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
+				case tmrstate.LONGBREAKOVER:
  						return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
 	 				break;
  			}
@@ -210,13 +233,16 @@
 						return "Work session."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+				case tmrstate.LONGBREAKREQUIRED:
 						if (isLongBreak()) {
 							return "Take a LONG break ("+ duration2txt(determineBreakDuration())+')'
 						} else {
 							return "Take a break ("+ duration2txt(determineBreakDuration())+')'
 						}
 	 				break;
+					
  				case tmrstate.ONBREAK:
+				case tmrstate.ONLONGBREAK:
 						if (isLongBreak()) {
 							return "Long break."
 						} else {
@@ -224,6 +250,7 @@
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
+				case tmrstate.LONGBREAKOVER:
  						return "Finish your break (work for "+ duration2txt(determineWorkDuration())+').'
 	 				break;
  			}
@@ -240,13 +267,22 @@
 						str +=  "You should be working."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
- 						str +=  "You should now take a break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
+						str +=  "You should now take a break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
+	 				break;
+				case tmrstate.LONGBREAKREQUIRED:
+ 						str +=  "You should now take a long break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
 	 				break;
  				case tmrstate.ONBREAK:
- 						str +=  "You should be enjoying your break right now."
+						str +=  "You should be enjoying your break right now."
+					break;
+				case tmrstate.ONLONGBREAK:
+ 						str +=  "You should be enjoying your long break right now."
 	 				break;
  				case tmrstate.BREAKOVER:
- 						str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+					break;
+				case tmrstate.LONGBREAKOVER:
+ 						str +=  "You should finish your long break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
 	 				break;
  			}
  			return str;
@@ -290,10 +326,15 @@
  							dur = wd;
  							state = tmrstate.WORKING
  							workSessionsStartedNum += 1;
+							workSessionsStartedSinceLongBreakNum += 1;
  						} else {
  							dur = bd;
  							state = tmrstate.ONBREAK
- 							breakSessionsStartedNum += 1;
+							if (isLongBreak()) {
+								longBreakSessionsStartedNum += 1;
+							} else {
+								breakSessionsStartedNum += 1;
+							}
  						}
  						
  						evtTime = tme+dur
@@ -433,13 +474,18 @@
  			dur = -1;
  			
  			if (longbreaksCountFinishedWork != true) {
-				workSessionsNum = workSessionsStartedNum;
+				workSessionsNum = workSessionsStartedSinceLongBreakNum;
 			} else {
-				workSessionsNum = workSessionsFinishedNum;
+				workSessionsNum = workSessionsFinishedSinceLongBreakNum;
 			}
 			
-			// determine if long break
-			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) { 
+			if ((state == tmrstate.ONLONGBREAK) || (state == tmrstate.LONGBREAKREQUIRED) || (state == tmrstate.LONGBREAKOVER)) {
+				// state says its a long break (maybe entered manually)
+				return true;
+			}
+			
+			// determine if long break by rule
+			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && (workSessionsNum > 0) && (workSessionsNum >= lba)) { 
 				// long break required
 				return true;
 				
@@ -449,38 +495,30 @@
 			}
 		}
 		
+		function getShortBreakDuration() {
+			var bdstr = document.getElementById('breakDuration').value;
+ 			var bd = txt2duration(bdstr)
+			return bd;
+		}
+		function getLongBreakDuration() {
+			var lbdstr = document.getElementById('longBreakDuration').value;
+ 			var lbd = txt2duration(lbdstr)
+			return lbd;
+		}
  		function determineBreakDuration() {
- 			wdstr = document.getElementById('workDuration').value;
- 			wd = txt2duration(wdstr)
+ 			 			
+ 			var bd = getShortBreakDuration();
+ 			var lbd = getLongBreakDuration();
  			
- 			bdstr = document.getElementById('breakDuration').value;
- 			bd = txt2duration(bdstr)
- 			
- 			lbdstr = document.getElementById('longBreakDuration').value;
- 			lbd = txt2duration(lbdstr)
- 			
- 			lbastr = document.getElementById('longBreakAfter').value;
- 			lba = parseInt(lbastr)
- 			
- 			enableLongbreaks = document.getElementById('cbEnableLongBreaks').checked;
- 			longbreaksCountFinishedWork = document.getElementById('cbLongbreaksCountOnlyCompletedWork').checked;
- 			
- 			dur = -1;
- 			
- 			if (longbreaksCountFinishedWork != true) {
-				workSessionsNum = workSessionsStartedNum;
-			} else {
-				workSessionsNum = workSessionsFinishedNum;
-			}
-			
+ 			var dur = -1; 					
 			// determine if long break
-			if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) { 
+			//if ((lbd >= 0) && (lba > 0) && (enableLongbreaks == true) && ((workSessionsNum % lba) == 0)) {
+			if (isLongBreak()) {
 				// long break required
-				var dur = lbd;
-				
+				dur = lbd;		
 			} else {
 				// standard break
-				var dur = bd;
+				dur = bd;
 			}
 			//alertl("DEBUG: bd="+duration2txt(dur),3)
 			return dur;
@@ -503,7 +541,8 @@
  			}
  		}
  		
- 		function StartBreak() {
+ 		function StartBreak(StartBreakType) {
+			
  			if (!isRunning) {
  				startTmr()
  			}
@@ -520,12 +559,17 @@
 						//ok 
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+						//ok
+	 				break;
+				case tmrstate.LONGBREAKREQUIRED:
  						//ok
 	 				break;
  				case tmrstate.ONBREAK:
+				case tmrstate.ONLONGBREAK:
  						return;
 	 				break;
  				case tmrstate.BREAKOVER:
+				case tmrstate.LONGBREAKOVER:
  						return;
 	 				break;
  			}
@@ -538,9 +582,25 @@
  			eladstr = duration2txt(elaDuration);
 			
 			performAutosave()
+			
+			
+			if ((StartBreakType == undefined) || (StartBreakType == null) || ((typeof(StartBreakType) != 'breaktype') && (typeof(StartBreakType) != 'string')) || (StartBreakType == breaktype.UNDEFINEDBREAK)) {
+				var longb = isLongBreak();
+				var dur = determineBreakDuration();
+			} else if (StartBreakType == breaktype.SHORTBREAK) {
+				var longb = false;
+				var dur = getShortBreakDuration();
+			} else if (StartBreakType == breaktype.LONGBREAK) {
+				var longb = true;
+				var dur = getLongBreakDuration();
+			} else { // should never happen
+				console.log('Uncatched case in StartBreak for StartBreakType. Defaulting')
+				var longb = isLongBreak();
+				var dur = determineBreakDuration();
+			}
  			
 			
-			alertl(' # Starting break after working for '+eladstr+'.',1)
+			alertl(' # Starting '+(longb?'long ':'')+'break after working for '+eladstr+'.',1)
  			
  			elaDuration = 0;
  			startTime = tme
@@ -573,15 +633,19 @@
  			
  			
  			
- 			state = tmrstate.ONBREAK
+			if (longb) {
+				state = tmrstate.ONLONGBREAK
+				longBreakSessionsStartedNum += 1;
+			} else {
+				state = tmrstate.ONBREAK;
+				breakSessionsStartedNum += 1;
+			}
  							
 			isWorking = false;
 			document.getElementById('rbWrkBrk_Brk').checked = true
 			document.getElementById('rbWrkBrk_Wrk').checked = false
 			
-			var dur = determineBreakDuration()
 			//alertl("DEBUG2: bd="+duration2txt(dur),3)
-			var longb = isLongBreak()
 			
 			if (longb) {
 				var msg = ('> Long break (for '+duration2txt(dur)+') started.')
@@ -593,7 +657,7 @@
 		
 			var tmrEvt = window.setTimeout(onTmrEvt, dur)
 			
-			breakSessionsStartedNum += 1;
+			
 			
 			alertl(msg,1)
  		}
@@ -629,17 +693,29 @@
 						return;
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+				case tmrstate.LONGBREAKREQUIRED:
  						return;
 	 				break;
  				case tmrstate.ONBREAK:
+						// ok
+					break;
+				case tmrstate.ONLONGBREAK:
  						// ok
+						// workSessionsStartedSinceLongBreakNum = 0; // when a long break is cancelled, be insistent and require a complete long break next time
+						// workSessionsFinishedSinceLongBreakNum = 0;
 	 				break;
  				case tmrstate.BREAKOVER:
+						// ok
+	 				break;
+				case tmrstate.LONGBREAKOVER:
  						// ok
+						workSessionsStartedSinceLongBreakNum = 0; // after competing a long break, reset counters
+						workSessionsFinishedSinceLongBreakNum = 0;
 	 				break;
  			}
 			
  			workSessionsStartedNum += 1;
+			workSessionsStartedSinceLongBreakNum += 1;
  			
  			tme = Date.now();
  			remDuration = evtTime - tme // negative: elapsed
@@ -690,8 +766,8 @@
  		}
  		
 		
-		function getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum) {
-			var statsstr = duration2txt(workSum)+' of work sessions: '+workSessionsStartedNum.toString()+' started ('+workSessionsFinishedNum.toString()+' finished) ' + '  /  ' + duration2txt(breakSum)+' of break sessions: '+breakSessionsStartedNum.toString()+' started ('+ breakSessionsFinishedNum.toString() +' finished)';
+		function getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum) {
+			var statsstr = duration2txt(workSum)+' of work sessions: \n  total: ('+workSessionsStartedNum.toString()+' started), ('+workSessionsFinishedNum.toString()+' finished)\n         ('+workSessionsStartedSinceLongBreakNum.toString()+' started), ('+workSessionsFinishedSinceLongBreakNum.toString()+' finished) since long break ' + '\n' + duration2txt(breakSum)+' of break sessions: \n  short: ('+breakSessionsStartedNum.toString()+' started), ('+ breakSessionsFinishedNum.toString() +' finished) \n  long:  ('+longBreakSessionsStartedNum.toString()+' started), ('+ longBreakSessionsFinishedNum.toString() +' finished) ';
 			return statsstr;
 		}
 		
@@ -713,7 +789,7 @@
 			
  			displayStatus(state,isRunning, state2str(state) + ", tmr is "+ ((isRunning)? 'running':'stopped') );
  			document.getElementById('edtstatus').title = 'TZ'+((dto.getTimezoneOffset() >= 0)? '+':'')+ dto.getTimezoneOffset().toString()
- 			statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+ 			statsstr = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
  			document.getElementById('edtstatistics').value= statsstr;
 			
 			remdstr = duration2txt(remDuration);
@@ -739,6 +815,12 @@
  				subsymbol = '_ending';
  			}
  			document.getElementById('symbolimg').src = state.toString()+subsymbol+'.png';
+			
+			if (isLongBreak()) {
+				document.getElementById('btnBreak').value = "Take (long) Break";
+			} else {
+				document.getElementById('btnBreak').value = "Take (short) Break";
+			}
 			
 		}
 		
@@ -787,26 +869,38 @@
  			isWorking = document.getElementById('rbWrkBrk_Wrk').checked;
 			onclickfn = null;
 			
+			
  			switch (state) {
  				case tmrstate.INIT: // this should never happen
  					break;
  					
  				case tmrstate.WORKING:
 				
-				 	document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+				 	document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
  			
  					if (remDuration < 0) {
  						if (!autoswitchtobreak) {
- 							state = tmrstate.BREAKREQUIRED
+							if (isLongBreak()) {
+								state = tmrstate.LONGBREAKREQUIRED
+							} else {
+								state = tmrstate.BREAKREQUIRED;
+							}
  							
  							workSessionsFinishedNum += 1;
+							workSessionsFinishedSinceLongBreakNum += 1;
  							
  							onclickfn = window['StartBreakFromNotification'];
  							applymsg = 'Start my break';
  							alertl('> Break required.',1)
  						} else {
- 							state = tmrstate.BREAKREQUIRED
+ 							if (isLongBreak()) {
+								state = tmrstate.LONGBREAKREQUIRED
+							} else {
+								state = tmrstate.BREAKREQUIRED;
+							}
+							
  							workSessionsFinishedNum += 1;
+							workSessionsFinishedSinceLongBreakNum += 1;
  							
  							if (document.getElementById('cbPlayAudio').checked) {
 				 				try {
@@ -830,10 +924,11 @@
  				
 	 				break;
  				case tmrstate.BREAKREQUIRED:
-					document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum);
+				case tmrstate.LONGBREAKREQUIRED:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum + elaDuration, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
 	 				break;
  				case tmrstate.ONBREAK:
-					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum);
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
 				
  					if (remDuration < 0) {
  						if (!autoswitchtowork) {
@@ -866,9 +961,47 @@
 	 						
  						}
  					}
+					break;
+				case tmrstate.ONLONGBREAK:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
+				
+ 					if (remDuration < 0) {
+ 						if (!autoswitchtowork) {
+ 							state = tmrstate.LONGBREAKOVER
+ 							
+ 							longBreakSessionsFinishedNum += 1;
+ 							
+ 							onclickfn = window['StartWorkFromNotification'];
+ 							applymsg = 'Start working';
+ 							alertl('> Long break over.',1)
+ 						} else {
+ 							state = tmrstate.LONGBREAKOVER
+ 							longBreakSessionsFinishedNum += 1;
+ 							
+ 							if (document.getElementById('cbPlayAudio').checked) {
+				 				try {
+				 				  var audio = document.getElementById('audio_'+state.toString()); audio.play();
+				 				  alertl('Play audio '+audio.id,3);
+				 				} catch(err) {
+								  alertl(err.message,3);
+								}
+				 			}
+ 							
+ 							alertl('> Long break over, autostarting work...',1)
+ 							StartWork();
+ 							
+ 							tme = Date.now();
+				 			remDuration = evtTime - tme // negative: elapsed
+				 			elaDuration = tme - startTime
+	 						
+ 						}
+ 					}
 	 				break;
  				case tmrstate.BREAKOVER:
-					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum + elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum);
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
+	 				break;
+				case tmrstate.LONGBREAKOVER:
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
 	 				break;
  			}
  			
@@ -920,6 +1053,12 @@
  			document.getElementById('DateTime').value = tmestr;
  			
  			document.getElementById('symbolimg').src = state.toString()+subsymbol+'.png';
+			
+			if (isLongBreak()) {
+				document.getElementById('btnBreak').value = "Take (long) Break";
+			} else {
+				document.getElementById('btnBreak').value = "Take (short) Break";
+			}
  			
  			
  			document.getElementById('workSum').value = duration2txt(workSum);
@@ -1123,6 +1262,10 @@
 			tstate["workSessionsFinishedNum"] = workSessionsFinishedNum;
 			tstate["breakSessionsStartedNum"] = breakSessionsStartedNum;
 			tstate["breakSessionsFinishedNum"] = breakSessionsFinishedNum;
+			tstate["longBreakSessionsStartedNum"] = longBreakSessionsStartedNum;
+			tstate["longBreakSessionsFinishedNum"] = longBreakSessionsFinishedNum;
+			tstate["workSessionsStartedSinceLongBreakNum"] = workSessionsStartedSinceLongBreakNum;
+			tstate["workSessionsFinishedSinceLongBreakNum"] = workSessionsFinishedSinceLongBreakNum;
 			
 			tstate["wrkDur"] = wrkDur;
 			tstate["brkDur"] = brkDur;
@@ -1234,6 +1377,10 @@
 			workSessionsFinishedNum = tstate["workSessionsFinishedNum"];
 			breakSessionsStartedNum = tstate["breakSessionsStartedNum"];
 			breakSessionsFinishedNum = tstate["breakSessionsFinishedNum"];
+			longbreakSessionsStartedNum  = tstate["longBreakSessionsStartedNum"];
+			longbreakSessionsFinishedNum = tstate["longBreakSessionsFinishedNum"];
+			workSessionsStartedSinceLongBreakNum  = tstate["workSessionsStartedSinceLongBreakNum"];
+			workSessionsFinishedSinceLongBreakNum = tstate["workSessionsFinishedSinceLongBreakNum"];
 			
 			wrkDur = tstate["wrkDur"];
 			brkDur = tstate["brkDur"];
@@ -1505,6 +1652,8 @@
 		  
 		  <input type="button" class="btnBig" id="btnWork" onClick="StartWork()" accesskey="w" value="Start/Resume Working">
 		  <input type="button" class="btnBig" id="btnBreak" onClick="StartBreak()" accesskey="b" value="Take Break">
+		  <input type="button" class="btnMedium" id="btnShortBreak" onClick="StartBreak(breaktype.SHORTBREAK)" accesskey="t" value="Take Short Break">
+		  <input type="button" class="btnMedium" id="btnLongBreak"  onClick="StartBreak(breaktype.LONGBREAK)" accesskey="g" value="Take Long Break">
 		  <input type="button" class="btnBig" id="btnPause" onClick="pauseTmr()" accesskey="p" value="Pause Tmr">
 		  <input type="button" class="btnBig" id="btnResume" onClick="startTmr()" accesskey="s" value="Start/Resume Tmr">
 	  </fieldset>
@@ -1517,8 +1666,9 @@
 			  <label for="breakSum">Total Break Duration:</label>
 			  <input type="text" id="breakSum" name="breakSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
 		  
-			  <label for="edtstatistics" class="nowidth">Statistics:</label>
-			  <input type="text" id="edtstatistics" name="edtstatistics" value="" size="94"> <br/>
+			  <label for="edtstatistics" class="nowidth" style="vertical-align:top;">Statistics:</label>
+			  <textarea cols="55" rows="5" id="edtstatistics" name="edtstatistics"></textarea>
+			  <!--input type="text" id="edtstatistics" name="edtstatistics" value="" size="94"--> <br/>
 			  
 			  <label for="nothing1" class="">Reset stats:</label>
 			  <input type="button"  id="btnClearSessionCounts" onClick="clearSessionCounts()" value="Clear Session Counters">
@@ -1557,6 +1707,18 @@
 	<audio id="audio_breakrequired">
 	  <source src="breakrequired.mp3" type="audio/mpeg">
 	  <source src="breakrequired.wav" type="audio/wave">
+	  Your browser does not support the audio element.
+	</audio>
+	
+	<audio id="audio_longbreakover">
+	  <source src="longbreakover.mp3" type="audio/mpeg">
+	  <source src="longbreakover.wav" type="audio/wave">
+	  Your browser does not support the audio element.
+	</audio>
+	
+	<audio id="audio_longbreakrequired">
+	  <source src="longbreakrequired.mp3" type="audio/mpeg">
+	  <source src="longbreakrequired.wav" type="audio/wave">
 	  Your browser does not support the audio element.
 	</audio>
  		
