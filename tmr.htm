@@ -23,8 +23,10 @@
  		label.radio, label.checkbox { min-width: 17ex; display:inline-block; text-align:left; }
  		label.log { display:inline-block; text-align:left; }
  		fieldset { border: 1px solid #E0E0E0; display:inline-block; }
- 		.btnBig {min-width: 25ex; min-height: 5em;}
-		.btnMedium {min-width: 25ex; min-height: 2.5em;}
+ 		.btnBig {min-width: 24ex; min-height: 5em;}
+		.btnBigNarrow {min-width: 18ex; min-height: 5em;}
+		.btnMedium {min-width: 24ex; min-height: 2.5em;}
+		.medBtnGrp { border:0; padding:0; margin:0; display:inline-block; max-width: 24ex; vertical-align:bottom; }
  		
  		#frmTmr { border: 10px solid transparent; padding: 4px; }
  		
@@ -351,8 +353,11 @@
  					
  				case tmrstate.WORKING:
  				case tmrstate.BREAKREQUIRED:
+				case tmrstate.LONGBREAKREQUIRED:
  				case tmrstate.ONBREAK:
+				case tmrstate.ONLONGBREAK:
  				case tmrstate.BREAKOVER:
+				case tmrstate.LONGBREAKOVER:
 	 					dur = remDuration
 	 					
 	 					evtTime = tme+dur
@@ -418,8 +423,11 @@
  					
  				case tmrstate.WORKING:
  				case tmrstate.BREAKREQUIRED:
+				case tmrstate.LONGBREAKREQUIRED:
  				case tmrstate.ONBREAK:
+				case tmrstate.ONLONGBREAK:
  				case tmrstate.BREAKOVER:
+				case tmrstate.LONGBREAKOVER:
 	 					remDuration = evtTime - tme // negative: elapsed since event
 	 					elaDuration = tme - startTime
 	 					
@@ -1000,10 +1008,10 @@
  					}
 	 				break;
  				case tmrstate.BREAKOVER:
-					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum+elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
 	 				break;
 				case tmrstate.LONGBREAKOVER:
-					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
+					document.getElementById('edtstatistics').value = getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum+elaDuration, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
 	 				break;
  			}
  			
@@ -1626,7 +1634,7 @@
 	  <fieldset id="status">
 		  <legend>Status</legend>	  
 		  
-		  <img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px; float:right;" id="symbolimg">
+		  <img src="blank.png" alt="state graphic" style="max-width: 250px; height:150px; float:right;" id="symbolimg">
 		  
 		  <label for="elapsedDuration">Elapsed Duration:</label>
 		  <input type="text" id="elapsedDuration" name="elapsedDuration" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"><br/>
@@ -1654,10 +1662,10 @@
 		  
 		  <input type="button" class="btnBig" id="btnWork" onClick="StartWork()" accesskey="w" value="Start/Resume Working">
 		  <input type="button" class="btnBig" id="btnBreak" onClick="StartBreak()" accesskey="b" value="Take Break">
-		  <input type="button" class="btnMedium" id="btnShortBreak" onClick="StartBreak(breaktype.SHORTBREAK)" accesskey="t" value="Take Short Break">
-		  <input type="button" class="btnMedium" id="btnLongBreak"  onClick="StartBreak(breaktype.LONGBREAK)" accesskey="g" value="Take Long Break">
-		  <input type="button" class="btnBig" id="btnPause" onClick="pauseTmr()" accesskey="p" value="Pause Tmr">
-		  <input type="button" class="btnBig" id="btnResume" onClick="startTmr()" accesskey="s" value="Start/Resume Tmr">
+		  <div class="medBtnGrp"><input type="button" class="btnMedium" id="btnShortBreak" onClick="StartBreak(breaktype.SHORTBREAK)" accesskey="t" value="Take Short Break">
+		  <input type="button" class="btnMedium" id="btnLongBreak"  onClick="StartBreak(breaktype.LONGBREAK)" accesskey="g" value="Take Long Break"></div>
+		  <input type="button" class="btnBigNarrow" id="btnPause" onClick="pauseTmr()" accesskey="p" value="Pause Tmr">
+		  <input type="button" class="btnBigNarrow" id="btnResume" onClick="startTmr()" accesskey="s" value="Start/Resume Tmr">
 	  </fieldset>
 	  <br/>
 	  
@@ -1669,7 +1677,7 @@
 			  <input type="text" id="breakSum" name="breakSum" pattern="([\+\-]*[\d]{2}:[\d]{2}|[\+\-]*[\d]{2}:[\d]{2}:[\d]{2})" title="Use time formats hh:mm or hh:mm:ss" value="00:00:00"> <br/>
 		  
 			  <label for="edtstatistics" class="nowidth" style="vertical-align:top;">Statistics:</label>
-			  <textarea cols="55" rows="5" id="edtstatistics" name="edtstatistics"></textarea>
+			  <textarea cols="55" rows="6" id="edtstatistics" name="edtstatistics"></textarea>
 			  <!--input type="text" id="edtstatistics" name="edtstatistics" value="" size="94"--> <br/>
 			  
 			  <label for="nothing1" class="">Reset stats:</label>
@@ -1697,7 +1705,7 @@
 	  <br/>
 	  <label for="tlog" class="tlog">Log:</label> <br/>  
 	  <textarea cols="55" rows="10" id="tlog"></textarea>
-	  <!--img src="blank.png" alt="image showing state in graphical form" style="max-width: 250px; height:150px;" id="symbolimg"-->
+	  <!--img src="blank.png" alt="state graphic" style="max-width: 250px; height:150px;" id="symbolimg"-->
 	</form>
  	
  	<audio id="audio_breakover">
