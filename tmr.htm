@@ -209,14 +209,14 @@
 					return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
 	 				break;
  				case tmrstate.ONBREAK:
-						if (isLongBreak()) { // we should be on long but have chosen short
+						if (isLongBreak(true)) { // we should be on long but have chosen short
 							return "You should be taking a long break (short chosen)."
 						} else {
 							return "You should be taking a break."
 						}
 					break;
 				case tmrstate.ONLONGBREAK:
-						if (isLongBreak()) {
+						if (isLongBreak(true)) {
 							return "You should be taking a long break."
 						} else {
 							return "You should be taking a (long) break."
@@ -242,7 +242,7 @@
 	 				break;
  				case tmrstate.BREAKREQUIRED:
 				case tmrstate.LONGBREAKREQUIRED:
-						if (isLongBreak()) {
+						if (isLongBreak(true)) {
 							return "Take a LONG break ("+ duration2txt(determineBreakDuration())+')'
 						} else {
 							return "Take a break ("+ duration2txt(determineBreakDuration())+')'
@@ -250,11 +250,17 @@
 	 				break;
 					
  				case tmrstate.ONBREAK:
+					if (isLongBreak(true)) { // long req, short selected
+						return "Break (shortened)."
+					} else {
+						return "Break."
+					}
+	 				break;
 				case tmrstate.ONLONGBREAK:
-						if (isLongBreak()) {
+						if (isLongBreak(true)) {
 							return "Long break."
 						} else {
-							return "Break."
+							return "Long break!"
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
@@ -281,17 +287,21 @@
  						str +=  "You should now take a long break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
 	 				break;
  				case tmrstate.ONBREAK:
-					if (isLongBreak()) {
+					if (isLongBreak(true)) {
 						str +=  "You should be enjoying your break right now (a bit longer maybe)."
 					} else {
 						str +=  "You should be enjoying your break right now."
 					}
 					break;
 				case tmrstate.ONLONGBREAK:
- 						str +=  "You should be enjoying your long break right now."
+						if (isLongBreak(true)) {
+							str +=  "You should be enjoying your long break right now."
+						} else {
+							str +=  "You should be enjoying your lenthened break right now."
+						}
 	 				break;
  				case tmrstate.BREAKOVER:
-						if (isLongBreak()) {
+						if (isLongBreak(true)) {
 							str +=  "You should finish your shortened break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
 						} else {
 							str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
@@ -299,7 +309,12 @@
 						
 					break;
 				case tmrstate.LONGBREAKOVER:
- 						str +=  "You should finish your long break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						if (isLongBreak(true)) {
+							str +=  "You should finish your long break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						} else {
+							str +=  "You should finish your lengthened break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						}
+ 						
 	 				break;
  			}
  			return str;
@@ -478,7 +493,14 @@
  		}
  		
  		
-		function isLongBreak() {
+		function isLongBreak(ignoretmrstate) {
+			if ((ignoretmrstate == undefined)) || (ignoretmrstate == null) || (ignoretmrstate == false) || (ignoretmrstate == 0)) {
+				ignoretmrstate = false;
+			}
+			if ((ignoretmrstate == 1) || (ignoretmrstate == true)) {
+				ignoretmrstate = true;
+			}
+		
 			wdstr = document.getElementById('workDuration').value;
  			wd = txt2duration(wdstr)
  			
@@ -502,9 +524,11 @@
 				workSessionsNum = workSessionsFinishedSinceLongBreakNum;
 			}
 			
-			if ((state == tmrstate.ONLONGBREAK) || (state == tmrstate.LONGBREAKREQUIRED) || (state == tmrstate.LONGBREAKOVER)) {
-				// state says its a long break (maybe entered manually)
-				return true;
+			if (!ignoretmrstate) {
+				if ((state == tmrstate.ONLONGBREAK) || (state == tmrstate.LONGBREAKREQUIRED) || (state == tmrstate.LONGBREAKOVER)) {
+					// state says its a long break (maybe entered manually)
+					return true;
+				}
 			}
 			
 			// determine if long break by rule
@@ -1629,7 +1653,7 @@
 			
 		  <input type="checkbox" id="cbPlayAudio" name="cbPlayAudio" value="1" checked /><label for="cbPlayAudio" class="checkbox">Play Audio Notifications (if allowed by browser)</label> <br/>
 		  
-		  <input type="checkbox" id="cbAutoRunOnLoad" name="cbAutoRunOnLoad" value="1" /><label for="cbAutoRunOnLoad" class="checkbox">Automatically run on page load with user settings from local storage (save (again) to local storage update setting)</label> <br/>
+		  <input type="checkbox" id="cbAutoRunOnLoad" name="cbAutoRunOnLoad" value="1" /><label for="cbAutoRunOnLoad" class="checkbox">Automatically run on page load with user settings from local storage (save (again) to local storage to update setting)</label> <br/>
 		  
 		  <input type="button" onClick="validateInput()" value="Check">
 		  Presets: 
