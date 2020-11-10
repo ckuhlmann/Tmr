@@ -203,19 +203,21 @@
 						return "You should be working."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
+					return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
 				case tmrstate.LONGBREAKREQUIRED:
-						if (isLongBreak()) {
-							return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
-						} else {
-							return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
-						}
+						return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
 	 				break;
  				case tmrstate.ONBREAK:
+						if (isLongBreak()) { // we should be on long but have chosen short
+							return "You should be taking a long break (short chosen)."
+						} else {
+							return "You should be taking a break."
+						}
 				case tmrstate.ONLONGBREAK:
 						if (isLongBreak()) {
 							return "You should be taking a long break."
 						} else {
-							return "You should be taking a break."
+							return "You should be taking a (long) break."
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
@@ -275,13 +277,22 @@
  						str +=  "You should now take a long break for "+ duration2txt(determineBreakDuration())+' (h:m:s).'
 	 				break;
  				case tmrstate.ONBREAK:
+					if (isLongBreak()) {
+						str +=  "You should be enjoying your break right now (a bit longer maybe)."
+					} else {
 						str +=  "You should be enjoying your break right now."
+					}
 					break;
 				case tmrstate.ONLONGBREAK:
  						str +=  "You should be enjoying your long break right now."
 	 				break;
  				case tmrstate.BREAKOVER:
-						str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						if (isLongBreak()) {
+							str +=  "You should finish your shortened break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						} else {
+							str +=  "You should finish your break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
+						}
+						
 					break;
 				case tmrstate.LONGBREAKOVER:
  						str +=  "You should finish your long break and continue working for "+ duration2txt(determineWorkDuration())+' (h:m:s).'
