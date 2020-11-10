@@ -203,9 +203,10 @@
 						return "You should be working."
 	 				break;
  				case tmrstate.BREAKREQUIRED:
-					return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
+					return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
+					break;
 				case tmrstate.LONGBREAKREQUIRED:
-						return "You should take a break for "+ duration2txt(determineBreakDuration())+'.'
+					return "You should take a LONG break for "+ duration2txt(determineBreakDuration())+'.'
 	 				break;
  				case tmrstate.ONBREAK:
 						if (isLongBreak()) { // we should be on long but have chosen short
@@ -213,6 +214,7 @@
 						} else {
 							return "You should be taking a break."
 						}
+					break;
 				case tmrstate.ONLONGBREAK:
 						if (isLongBreak()) {
 							return "You should be taking a long break."
@@ -221,6 +223,8 @@
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
+						return "You should finish your long break (work for "+ duration2txt(determineWorkDuration())+').'
+					break;
 				case tmrstate.LONGBREAKOVER:
  						return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
 	 				break;
