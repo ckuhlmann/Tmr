@@ -767,7 +767,9 @@
  		
 		
 		function getStatsStr(workSum, workSessionsStartedNum, workSessionsFinishedNum, breakSum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum) {
-			var statsstr = duration2txt(workSum)+' of work sessions: \n  total: ('+workSessionsStartedNum.toString()+' started), ('+workSessionsFinishedNum.toString()+' finished)\n         ('+workSessionsStartedSinceLongBreakNum.toString()+' started), ('+workSessionsFinishedSinceLongBreakNum.toString()+' finished) since long break ' + '\n' + duration2txt(breakSum)+' of break sessions: \n  short: ('+breakSessionsStartedNum.toString()+' started), ('+ breakSessionsFinishedNum.toString() +' finished) \n  long:  ('+longBreakSessionsStartedNum.toString()+' started), ('+ longBreakSessionsFinishedNum.toString() +' finished) ';
+			var mxv  = Math.max(workSessionsStartedNum, workSessionsFinishedNum, breakSessionsStartedNum, breakSessionsFinishedNum, longBreakSessionsStartedNum, longBreakSessionsFinishedNum,  workSessionsStartedSinceLongBreakNum, workSessionsFinishedSinceLongBreakNum);
+			var flen = Math.floor(Math.log(mxv)/Math.log(10))+1;
+			var statsstr = duration2txt(workSum)+' of work sessions: \n  total: ('+prepad(workSessionsStartedNum.toString(),flen,' ')+' started), ('+prepad(workSessionsFinishedNum.toString(),flen,' ')+' finished)\n         ('+prepad(workSessionsStartedSinceLongBreakNum.toString(),flen,' ')+' started), ('+prepad(workSessionsFinishedSinceLongBreakNum.toString(),flen,' ')+' finished) since long break ' + '\n' + duration2txt(breakSum)+' of break sessions: \n  short: ('+prepad(breakSessionsStartedNum.toString(),flen,' ')+' started), ('+ prepad(breakSessionsFinishedNum.toString(),flen,' ') +' finished) \n  long:  ('+prepad(longBreakSessionsStartedNum.toString(),flen,' ')+' started), ('+ prepad(longBreakSessionsFinishedNum.toString(),flen,' ') +' finished) ';
 			return statsstr;
 		}
 		
