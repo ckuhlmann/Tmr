@@ -1023,7 +1023,7 @@
  					isNotifying = true;
  					if (document.getElementById('cbDesktopNotify').checked) {
  						alertl('Notifying...',3);
- 						Notif = showDesktopNotification(state2str(state), state2strlong(state), state.toString()+'.png', onclickfn, null, applymsg);
+ 						Notif = showDesktopNotification(state2str(state), state2strlong(state), 'notify_'+state.toString()+'.png', onclickfn, null, applymsg);
  					}
  					
  					if (document.getElementById('cbPlayAudio').checked) {
