@@ -223,10 +223,19 @@
 						}
 	 				break;
  				case tmrstate.BREAKOVER:
-						return "You should finish your long break (work for "+ duration2txt(determineWorkDuration())+').'
+						if (isLongBreak(true)) {
+							return "You should finish your shortened break (work for "+ duration2txt(determineWorkDuration())+').'
+						} else {
+							return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
+						}
 					break;
 				case tmrstate.LONGBREAKOVER:
- 						return "You should finish your break (work for "+ duration2txt(determineWorkDuration())+').'
+						if (isLongBreak(true)) {
+							return "You should finish your long break (work for "+ duration2txt(determineWorkDuration())+').'
+						} else {
+							return "You should finish your (long) break (work for "+ duration2txt(determineWorkDuration())+').'
+						}
+						
 	 				break;
  			}
  			return "";
