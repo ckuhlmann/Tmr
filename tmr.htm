@@ -1125,7 +1125,7 @@
  		}
  		
  		function fmtDateTime(dto) {
- 			str = prepad(dto.getFullYear(),4,'0') +'-'+ prepad(dto.getMonth()+1,2,'0') +'-'+ prepad(dto.getDate()+1,2,'0') +' '+prepad(dto.getHours(),2,'0')+":"+prepad(dto.getMinutes(),2,'0')+":"+prepad(dto.getSeconds(),2,'0')+""
+ 			str = prepad(dto.getFullYear(),4,'0') +'-'+ prepad(dto.getMonth()+1,2,'0') +'-'+ prepad(dto.getDate()+0,2,'0') +' '+prepad(dto.getHours(),2,'0')+":"+prepad(dto.getMinutes(),2,'0')+":"+prepad(dto.getSeconds(),2,'0')+""
  			return str;
  		}
  		
