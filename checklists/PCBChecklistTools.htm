@@ -9,10 +9,11 @@
     <link rel="stylesheet" href="checklist.css">
     
     <script type="text/javascript">
-		var CLdocversion = "1.0.1";
+		var CLdocversion = "1.0.2";
 	</script>
     
     <script src="jquery.js"></script>
+	<script src="sha1.js" type="text/javascript" charset="utf-8"></script>
     <!--<script src="zepto.js"></script>-->
 	<!--script src="fx.js"></script-->
 	
@@ -89,6 +90,59 @@
 				</ol>
 			</li>
 			<li id="ADOut" class="ORDER">        Output generation:  
+				<ol>                                              
+					<li>Use newest / applicable Output Jobfile</li>
+					
+				</ol>
+			</li>
+			
+		</ol>
+	</div>
+
+
+	<a name="CL2"></a>
+	<div class="checklist">
+		
+	<h1>CL2: KiCad Checklist </h1> 
+	
+		<ol>
+			
+			<li id="KiSch" class="Sch">        Schematic: <!--span title="settings">Options</span> <span class="shortcut">(??)</span-->
+		        <ol>                                                 
+					<li>Verify Project Options (or proper project template)
+						<ol>
+							<li>Schematic Setup &gt; Electrical Rules &gt; Violation severity</li>
+							<li>Schematic Setup &gt; Electrical Rules &gt; Pin Conflicts Map</li>
+							<li>Schematic Setup &gt; Project &gt; Netclasses</li>
+						</ol>
+					</li>
+					<li>Run ERC check: Inspect &gt; Electrical Rules Checker <span class="shortcut"></span> </li>
+					<li>Check connectivity with highlight net or using net class colors <span class="shortcut">~</span> <span class="shortcut">^</span>  <span class="shortcut">#</span> <span class="shortcut">Ctrl+Shift+H</span> </li>
+					<li>Check for latest library files (Tools &gt; update Symbols from Libraries...) but apply only if no important local changes were made. Otherwise, update manually. <span class="shortcut"></span> </li>
+				</ol>                                             
+			</li>                                                 
+			<li id="KiPCB" class="PCB">        PCB:  
+				<ol>                                              
+					<!--li>Check Component links: Project &gt; Component links... <span class="shortcut">(ck)</span></li-->
+					<li>Check for latest Schematic version: Tools &gt; Update PCB from Schematic... <span class="shortcut">F8</span> </li>
+					
+					<li>Check for latest library files (Tools &gt; update Footprints from Libraries...) but apply only if no important local changes were made. Otherwise, update manually. <span class="shortcut"></span> </li>
+					
+					<li>DRC
+						<ol>
+							<li>Check DRC settings and enabled DRC checks (Files &gt; Board Setup... &gt; Design Rules &gt; ...) <span classlabel="shortcut">Ctrl+Shift+B</span></li>
+							<!--li>Polygons and planes are set to direct connect with vias (design rules), Polygons and planes are set to thermal relief connect (typically four connections) with component pads </li-->
+							<!--li>In the Polygon Manager, check <i>every</i> Polygon's minimum neck width to be enabled and &ge; the minimum track width  <span class="shortcut">(tgm)</span>. Otherwise be aware that smaller necks are <i>not</i> reported by DRC as width or unrouted violations.</li-->
+							<li>Run DRC (Inspect &gt; Design Rules checker) <span class="shortcut">Ctrl+Shift+R</span>. Process every error.</li>
+						</ol>
+					</li>
+					
+					<li>Mechanical layers are used correctly. </li>
+					
+					
+				</ol>
+			</li>
+			<li id="KiOut" class="ORDER">        Output generation:  
 				<ol>                                              
 					<li>Use newest / applicable Output Jobfile</li>
 					
